@@ -5,10 +5,11 @@ on:
     branches: [main]
   pull_request:
 
-# Si llega otro push a la misma rama, se cancela la ejecución anterior
+# En una PR, un push nuevo cancela la ejecución anterior. En main nunca: una
+# ejecución cancelada hace que la insignia del README muestre "failing".
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

@@ -1,6 +1,6 @@
 # Style & Scent Engine
 
-[![CI](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml)
+[![CI](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml)
 
 Aplicación full-stack que analiza el outfit de un usuario y recomienda el perfume ideal de su colección, basándose en reglas de sinergia (estilo y color) y reglas de exclusión (notas olfativas vetadas). Las prendas se pueden registrar a mano o a partir de una foto, que analiza un microservicio de visión artificial.
 
