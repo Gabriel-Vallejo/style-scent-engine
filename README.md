@@ -102,7 +102,7 @@ Los errores se centralizan en `GlobalExceptionHandler` y siempre devuelven `{tim
 
 | Código | Cuándo |
 |---|---|
-| `400` | Petición inválida (faltan datos, sin prendas, el archivo no es una imagen...) |
+| `400` | Petición inválida: faltan datos, un texto supera la longitud máxima, JSON mal formado, el archivo no es una imagen... |
 | `404` | Algún ID no existe |
 | `413` | La foto supera los 10 MB |
 | `503` | El servicio de visión no responde (la app permite seguir registrando a mano) |
@@ -187,7 +187,7 @@ Al terminar, EAS da un enlace para descargar el APK. El perfil `preview` genera 
 El CI de GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) los ejecuta en cada push: el backend contra un MySQL cargado con `database/`, el servicio de visión con pytest y la app con `tsc` y ESLint. Dependabot revisa las dependencias cada semana.
 
 ```bash
-(cd backend && ./mvnw test)                        # 24 tests (necesita MySQL levantado)
+(cd backend && ./mvnw test)                        # 31 tests (necesita MySQL levantado)
 (cd vision-service && .venv/bin/python -m pytest)   # 17 tests (ver su README para crear el entorno)
 (cd frontend && npx tsc --noEmit && npm run lint)   # tipos y lint de la app
 ```

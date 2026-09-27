@@ -27,10 +27,16 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 - **`prenda_estilo` es M:N**, no 1:1: una prenda puede tener varios estilos a la
   vez (ej. las Ray-Ban Meta son Streetwear + Casual). `Prenda.estilos` es un `Set`,
   no una `List`; ojo con ese tipo al escribir código nuevo.
-- **`GlobalExceptionHandler`** centraliza errores: `EntityNotFoundException` → 404,
-  `IllegalArgumentException` → 400, `VisionNoDisponibleException` → 503,
-  `MaxUploadSizeExceededException` → 413. Cualquier excepción nueva de negocio
-  va ahí, no en try/catch ad-hoc en los controllers.
+- **`GlobalExceptionHandler`** centraliza errores con un único formato
+  `{timestamp, status, error, message}`: `EntityNotFoundException` → 404,
+  `IllegalArgumentException` y validación → 400, `VisionNoDisponibleException`
+  → 503, `MaxUploadSizeExceededException` → 413. Cualquier excepción nueva de
+  negocio va ahí, no en try/catch ad-hoc en los controllers.
+- **Validación de entrada con Bean Validation** (`@NotBlank`, `@Size`...) en los
+  DTOs de request + `@Valid` en los controllers. Los `@Size` coinciden con las
+  columnas de la BD: sin ellos, un texto largo llegaba a MySQL y daba 500.
+- **Bug resuelto (3)**: `filtros_exclusion` admitía dos filtros para la misma
+  nota y `findByNota` (Optional) reventaba con 500. Ahora `UNIQUE (id_nota)`.
 - **Separación de services**: `StyleScentService` es solo el motor de puntuación.
   El CRUD vive en `PrendaService` y `PerfumeService`, y el análisis de fotos en
   `AnalisisPrendaService`. No mezclar responsabilidades.
@@ -100,9 +106,14 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 - Hecho: backend completo (CRUD de prendas y perfumes, catálogos, motor de
   puntuación y recomendación, análisis de fotos), app con tres pestañas
   (Prenda / Perfume / Recomendar) y microservicio de visión (Fase 2).
-- Tests: 24 en el backend (JUnit + Mockito) y 17 en el servicio de visión (pytest).
-- Pendiente de verificar en un dispositivo real: la opción de foto en la
-  pestaña Prenda (cámara/galería con `expo-image-picker`).
+- Tests: 31 en el backend (JUnit + Mockito, incluidos 7 de la capa web con
+  `@WebMvcTest`) y 17 en el servicio de visión (pytest).
+- CI en GitHub Actions (`.github/workflows/ci.yml`): backend contra un MySQL de
+  servicio cargado con `database/`, pytest del servicio de visión y tsc + lint
+  de la app. Dependabot semanal (maven, pip), mensual (docker, actions) y en npm
+  solo seguridad: las versiones de Expo se actualizan con `npx expo install --fix`.
+- En GitHub están activados el escaneo de secretos, la protección de push y las
+  alertas/actualizaciones de seguridad de Dependabot.
 - Ideas abiertas: afinar los prompts de estilo con fotos reales del armario;
   revisar los puntos de las reglas de sinergia de los colores y estilos nuevos.
 
@@ -111,6 +122,7 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 - Repo **público** en GitHub: `Gabriel-Vallejo/style-scent-engine`. Nada de
   credenciales, IPs públicas ni datos sensibles en código, docs o commits.
 - Rama principal: `main`.
+- `.idea/` ya no se versiona (hay `.gitignore` en la raíz).
 - Commits separados por capa (`feat(backend)`, `feat(frontend)`, `feat(vision)`,
   `fix(db)`, `docs`...), en español.
 - `.gitattributes`: el esquema SQL cuenta en la barra de lenguajes de GitHub;
