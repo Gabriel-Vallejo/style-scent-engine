@@ -120,11 +120,7 @@ export default function RegistrarPrendaScreen() {
     setAnalisis(null);
     setAnalizando(true);
     try {
-      const sugerencias = await apiUploadImagen<AnalisisPrenda>(
-        "/prendas/analizar",
-        foto.uri,
-        foto.mimeType
-      );
+      const sugerencias = await apiUploadImagen<AnalisisPrenda>("/prendas/analizar", foto.uri);
       setAnalisis(sugerencias);
       // Solo sugerencias: se preseleccionan y el usuario las cambia si no le convencen
       if (sugerencias.categoria) setIdCategoria(sugerencias.categoria.id);

@@ -1,3 +1,5 @@
+import { File } from "expo-file-system";
+
 // En el APK la URL se fija al compilar (EXPO_PUBLIC_API_URL en eas.json); en
 // desarrollo con Expo Go se usa la IP del servidor en la red local.
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.44:8080/api";
@@ -54,12 +56,13 @@ export async function apiDelete(path: string): Promise<void> {
   }
 }
 
-// Sube una foto como multipart/form-data. En React Native el "archivo" es un
-// objeto { uri, name, type } que fetch lee del disco del móvil.
-export async function apiUploadImagen<T>(path: string, uri: string, mimeType?: string | null): Promise<T> {
-  const nombre = uri.split("/").pop() ?? "foto.jpg";
+// Sube una foto como multipart/form-data. Desde el SDK 57 el fetch global es
+// expo/fetch, que no acepta el clásico { uri, name, type } de React Native
+// ("Unsupported FormDataPart implementation"): el archivo tiene que ser un File
+// de expo-file-system, que implementa Blob y lleva su nombre y tipo.
+export async function apiUploadImagen<T>(path: string, uri: string): Promise<T> {
   const formData = new FormData();
-  formData.append("imagen", { uri, name: nombre, type: mimeType ?? "image/jpeg" } as unknown as Blob);
+  formData.append("imagen", new File(uri));
 
   const response = await fetch(`${API_BASE_URL}${path}`, { method: "POST", body: formData });
   const data = await response.json().catch(() => null);
