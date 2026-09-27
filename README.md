@@ -12,18 +12,22 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Frontend React Native (Expo) con formularios dinámicos y conexión en red local
 - [x] Registro de perfumes desde el móvil
 - [x] Gestión desde el móvil: listar y borrar prendas/perfumes, cambiar el estado de un perfume
-- [ ] Microservicio de visión artificial (Fase 2)
+- [x] Microservicio de visión artificial (Fase 2): sugiere categoría, color y estilos a partir de una foto
 
 ## Arquitectura
 ```
 ├── backend/             # API REST en Java + Spring Boot
 │   └── src/main/java/com/stylescent/
 │       ├── controller/  # Controladores REST (match, prendas, perfumes, catálogos)
+│       ├── vision/      # Cliente HTTP del microservicio de visión
 │       ├── dto/         # Objetos de transferencia de datos (DTOs)
 │       ├── model/       # Entidades JPA
 │       ├── repository/  # Spring Data JPA
 │       ├── service/     # Motor de puntuación (StyleScentService), PrendaService y PerfumeService
 │       └── exception/   # Manejo global de errores (GlobalExceptionHandler)
+├── vision-service/      # Microservicio de visión en Python (FastAPI + OpenCV + scikit-learn + CLIP)
+│   ├── app/             # API, detección de color y clasificador CLIP
+│   └── tests/           # pytest
 ├── frontend/            # Aplicación móvil en React Native (Expo)
 │   ├── App.tsx          # Navegación por pestañas
 │   └── src/
@@ -52,6 +56,7 @@ MySQL 8.0, normalizada en 3FN. El esquema está en [`database/01-schema.sql`](da
 | `GET` | `/api/prendas` | Lista las prendas registradas. |
 | `POST` | `/api/prendas` | Registra una nueva prenda validando sus relaciones (categoría, color, estilos). |
 | `DELETE` | `/api/prendas/{id}` | Borra una prenda (y sus estilos, en cascada). |
+| `POST` | `/api/prendas/analizar` | Recibe una foto (`multipart/form-data`, campo `imagen`, máx. 10 MB) y devuelve la categoría, el color y los estilos sugeridos con su ID y confianza. No guarda nada. `503` si el servicio de visión no está disponible. |
 | `GET` | `/api/perfumes` | Lista los perfumes en colección (los de "Lista de deseos" / "En camino" no se recomiendan). Con `?todos=true` devuelve todos. |
 | `POST` | `/api/perfumes` | Registra un perfume validando familia olfativa, estado y notas. |
 | `PATCH` | `/api/perfumes/{id}/estado` | Cambia el estado de posesión (ej. de "En camino" a "En coleccion"). Cuerpo: `{"idEstado": 1}`. |
@@ -72,6 +77,20 @@ Errores: los recursos inexistentes devuelven `404` y las peticiones inválidas `
 
 `recomendar(prendasIds)` aplica lo mismo a cada perfume "En coleccion" y ordena por `scoreSinAcotar`, para desempatar perfumes que llegan todos a 100.
 
+## Visión artificial (Fase 2)
+
+```
+Móvil ──foto──▶ Spring Boot ──foto + nombres del catálogo──▶ vision-service (FastAPI, :8001)
+  ▲                  │                                              │
+  └── formulario ◀───┘◀────────── sugerencias + confianza ──────────┘
+      prerrellenado      (el backend las traduce a IDs)
+```
+
+- **Color**: OpenCV separa la prenda del fondo (GrabCut, o el canal alfa si el PNG viene recortado) y k-means de scikit-learn agrupa sus píxeles en espacio Lab. Se fusionan los grupos que el ojo ve como el mismo color (ΔE < 12) y el mayor se compara con los colores del catálogo.
+- **Categoría y estilos**: CLIP (`openai/clip-vit-base-patch32`) en modo zero-shot contra frases en inglés generadas a partir de los nombres del catálogo. No hay que entrenar nada: un estilo nuevo en la BD se reconoce en la siguiente petición.
+- El servicio no accede a la BD: el backend le manda el catálogo en cada petición. Tampoco guarda las fotos.
+- La IA solo sugiere; el usuario confirma o corrige en el formulario antes de registrar.
+
 ## Cómo levantarlo
 
 ### 1. Base de datos
@@ -88,7 +107,18 @@ La primera vez que se crea el volumen, MySQL carga automáticamente los scripts 
 cd backend
 ./mvnw spring-boot:run
 ```
-### 3. Frontend (React Native / Expo)
+### 3. Servicio de visión (Python)
+```bash
+docker compose --env-file backend/.env up -d --build vision
+```
+La imagen descarga el modelo al construirse (~2,3 GB en total, CPU). Tests:
+```bash
+cd vision-service
+python3 -m venv .venv && .venv/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/python -m pytest
+```
+
+### 4. Frontend (React Native / Expo)
 ```bash
 cd frontend
 npx expo start
@@ -112,5 +142,5 @@ curl -X POST http://localhost:8080/api/match/recomendar \
 ## Stack
 - **Base de datos**: MySQL 8.0 (Docker)
 - **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok
-- **Frontend**: TypeScript, React Native, Expo, React Navigation (bottom tabs), Expo Vector Icons
-- **IA (Fase 2, próximamente)**: Python, FastAPI, OpenCV, scikit-learn
+- **Frontend**: TypeScript, React Native, Expo, React Navigation (bottom tabs), Expo Vector Icons, Expo Image Picker
+- **IA**: Python 3.12, FastAPI, OpenCV, scikit-learn, PyTorch + Hugging Face Transformers (CLIP)

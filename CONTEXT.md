@@ -56,7 +56,20 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   (es lo que usa Recomendar); la gestión usa `?todos=true`.
 - El desglose del match es estructurado (`detalles` con `tipo` y `puntos`),
   no strings: la app los pinta en verde/rojo según el signo.
-- Pendiente: Fase 2 (IA de visión artificial).
+- Fase 2 hecha: `vision-service/` (FastAPI, puerto 8001 solo en 127.0.0.1).
+  El backend le reenvía la foto con los nombres del catálogo
+  (`POST /api/prendas/analizar`) y traduce las sugerencias a IDs.
+  El servicio no toca la BD ni guarda fotos. Color con GrabCut + k-means en
+  Lab; categoría y estilo con CLIP zero-shot (prompts en `app/etiquetas.py`).
+- Detalles no obvios de la Fase 2:
+  - `VisionClient` fuerza HTTP/1.1: el HttpClient de Java intenta `h2c` y
+    uvicorn descarta el cuerpo → FastAPI respondía 422.
+  - El modelo CLIP va fijado a una revisión con `model.safetensors` (la rama
+    main del repo solo tiene `.bin`). El Dockerfile la descarga al construir.
+  - Un color nuevo del catálogo necesita su RGB en `COLORES_RGB`
+    (`etiquetas.py`); si ningún color tiene referencia, decide CLIP.
+  - Con solo 2 estilos en el catálogo, CLIP fuerza uno aunque no encaje:
+    el estilo es la sugerencia menos fiable.
 
 ## Convenciones de commits / repo
 
