@@ -6,11 +6,11 @@ import com.stylescent.model.SinergiaEstilo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface SinergiaEstiloRepository extends JpaRepository<SinergiaEstilo, Integer> {
 
     List<SinergiaEstilo> findByEstilo(Estilo estilo);
 
-    Optional<SinergiaEstilo> findByEstiloAndFamilia(Estilo estilo, FamiliaOlfativa familia);
+    // Cambiado a List para admitir múltiples reglas de estilo sin romper el motor
+    List<SinergiaEstilo> findByEstiloAndFamilia(Estilo estilo, FamiliaOlfativa familia);
 }

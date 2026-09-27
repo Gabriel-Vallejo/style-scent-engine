@@ -86,8 +86,8 @@ class StyleScentServiceTest {
 
         when(perfumeRepository.findById(17)).thenReturn(Optional.of(perfume));
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(Optional.of(sinergia));
-        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(Optional.empty());
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of(sinergia));
+        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(List.of());
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
@@ -102,8 +102,8 @@ class StyleScentServiceTest {
 
         when(perfumeRepository.findById(17)).thenReturn(Optional.of(perfume));
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(Optional.empty());
-        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(Optional.of(sinergia));
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of());
+        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(List.of(sinergia));
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
@@ -122,8 +122,8 @@ class StyleScentServiceTest {
 
         when(perfumeRepository.findById(17)).thenReturn(Optional.of(perfume));
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(Optional.empty());
-        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(Optional.empty());
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of());
+        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(List.of());
         when(filtroExclusionRepository.findByNota(iris)).thenReturn(Optional.of(filtro));
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
@@ -139,8 +139,8 @@ class StyleScentServiceTest {
 
         when(perfumeRepository.findById(17)).thenReturn(Optional.of(perfume));
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(Optional.of(sinergiaColor));
-        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(Optional.empty());
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of(sinergiaColor));
+        when(sinergiaEstiloRepository.findByEstiloAndFamilia(streetwear, cuero)).thenReturn(List.of());
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 

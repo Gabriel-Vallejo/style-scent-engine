@@ -3,6 +3,7 @@ package com.stylescent.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -32,12 +33,13 @@ public class Prenda {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "prenda_estilo",
-        joinColumns = @JoinColumn(name = "id_prenda"),
-        inverseJoinColumns = @JoinColumn(name = "id_estilo")
+            name = "prenda_estilo",
+            joinColumns = @JoinColumn(name = "id_prenda"),
+            inverseJoinColumns = @JoinColumn(name = "id_estilo")
     )
     private Set<Estilo> estilos = new HashSet<>();
 
-    @Column(name = "fecha_registro")
+    @CreationTimestamp
+    @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
 }
