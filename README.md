@@ -216,3 +216,7 @@ curl -X POST http://localhost:8080/api/prendas/analizar -F "imagen=@chaqueta.jpg
 - **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok
 - **App móvil**: TypeScript, React Native, Expo (SDK 57), React Navigation, Expo Vector Icons, Expo Image Picker, EAS Build
 - **IA**: Python 3.12, FastAPI, OpenCV, scikit-learn, PyTorch + Hugging Face Transformers (CLIP)
+
+## Licencia
+
+[MIT](LICENSE) © 2026 Gabriel Vallejo García
