@@ -85,11 +85,18 @@ export default function RecomendarPerfumeScreen() {
         setRanking(lista);
         setResultado(lista[0] ?? null);
       } else {
+        // Puede haber dejado de estar en la colección (borrado o cambiado de estado
+        // desde la pestaña Perfume) mientras seguía seleccionado aquí
+        const perfume = perfumes.find((p) => p.idPerfume === perfumeSeleccionado);
+        if (!perfume) {
+          setPerfumeSeleccionado(null);
+          Alert.alert("Perfume no disponible", "Ese perfume ya no está en tu colección. Elige otro.");
+          return;
+        }
         const match = await apiPost<MatchResult>("/match", {
           prendasIds: prendasSeleccionadas,
           perfumeId: perfumeSeleccionado,
         });
-        const perfume = perfumes.find((p) => p.idPerfume === perfumeSeleccionado)!;
         setRanking(null);
         setResultado({ perfume, resultado: match });
       }
