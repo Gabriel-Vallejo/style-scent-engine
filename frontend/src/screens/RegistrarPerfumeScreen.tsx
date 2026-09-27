@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -9,7 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { apiGet, apiPost } from "../api/client";
+import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { apiDelete, apiGet, apiPatch, apiPost } from "../api/client";
 import { CatalogoItem, PerfumeItem } from "../types";
 
 export default function RegistrarPerfumeScreen() {
@@ -22,6 +24,10 @@ export default function RegistrarPerfumeScreen() {
   const [idFamilia, setIdFamilia] = useState<number | null>(null);
   const [idEstado, setIdEstado] = useState<number | null>(null);
   const [idNotas, setIdNotas] = useState<number[]>([]);
+
+  const [coleccion, setColeccion] = useState<PerfumeItem[]>([]);
+  // Perfume cuyo estado se está cambiando, para bloquear toques repetidos
+  const [actualizando, setActualizando] = useState<number | null>(null);
 
   const [cargandoCatalogos, setCargandoCatalogos] = useState(true);
   const [enviando, setEnviando] = useState(false);
@@ -47,6 +53,56 @@ export default function RegistrarPerfumeScreen() {
     }
     cargarCatalogos();
   }, []);
+
+  const cargarColeccion = useCallback(async () => {
+    try {
+      setColeccion(await apiGet<PerfumeItem[]>("/perfumes?todos=true"));
+    } catch (error) {
+      // Sin backend ya avisa la carga de catálogos; aquí no repetimos el aviso
+    }
+  }, []);
+
+  // Al volver a la pestaña refrescamos por si algo cambió desde otra pantalla
+  useFocusEffect(
+    useCallback(() => {
+      cargarColeccion();
+    }, [cargarColeccion])
+  );
+
+  async function cambiarEstado(perfume: PerfumeItem, estado: CatalogoItem) {
+    if (perfume.estado === estado.nombre || actualizando !== null) return;
+    setActualizando(perfume.idPerfume);
+    try {
+      const actualizado = await apiPatch<PerfumeItem>(`/perfumes/${perfume.idPerfume}/estado`, {
+        idEstado: estado.id,
+      });
+      setColeccion((prev) =>
+        prev.map((p) => (p.idPerfume === actualizado.idPerfume ? actualizado : p))
+      );
+    } catch (error) {
+      Alert.alert("Error al cambiar el estado", (error as Error).message);
+    } finally {
+      setActualizando(null);
+    }
+  }
+
+  function confirmarBorrado(perfume: PerfumeItem) {
+    Alert.alert("Borrar perfume", `¿Seguro que quieres borrar "${perfume.nombre}"?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Borrar",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiDelete(`/perfumes/${perfume.idPerfume}`);
+            setColeccion((prev) => prev.filter((p) => p.idPerfume !== perfume.idPerfume));
+          } catch (error) {
+            Alert.alert("Error al borrar", (error as Error).message);
+          }
+        },
+      },
+    ]);
+  }
 
   function toggleNota(id: number) {
     setIdNotas((prev) =>
@@ -86,6 +142,7 @@ export default function RegistrarPerfumeScreen() {
       setMarca("");
       setIdFamilia(null);
       setIdNotas([]);
+      cargarColeccion();
     } catch (error) {
       Alert.alert("Error al registrar", (error as Error).message);
     } finally {
@@ -180,6 +237,59 @@ export default function RegistrarPerfumeScreen() {
           <Text style={styles.botonTexto}>Registrar perfume</Text>
         )}
       </TouchableOpacity>
+
+      <Text style={styles.seccion}>Tus perfumes ({coleccion.length})</Text>
+      {coleccion.length === 0 && (
+        <Text style={styles.vacio}>Todavía no has registrado ningún perfume.</Text>
+      )}
+      {estados.map((estado) => {
+        const delEstado = coleccion.filter((p) => p.estado === estado.nombre);
+        if (delEstado.length === 0) return null;
+        return (
+          <View key={estado.id}>
+            <Text style={styles.grupo}>
+              {estado.nombre} ({delEstado.length})
+            </Text>
+            {delEstado.map((p) => (
+              <View key={p.idPerfume} style={styles.item}>
+                <View style={styles.itemCabecera}>
+                  <View style={styles.itemTexto}>
+                    <Text style={styles.itemNombre}>{p.nombre}</Text>
+                    <Text style={styles.itemDetalle}>
+                      {[p.marca, p.familia].filter(Boolean).join(" · ")}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => confirmarBorrado(p)}
+                    hitSlop={10}
+                    accessibilityLabel={`Borrar ${p.nombre}`}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#e05757" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.estadoRow}>
+                  {estados.map((e) => {
+                    const activo = p.estado === e.nombre;
+                    return (
+                      <TouchableOpacity
+                        key={e.id}
+                        style={[styles.estadoChip, activo && styles.estadoChipActivo]}
+                        onPress={() => cambiarEstado(p, e)}
+                        disabled={actualizando !== null}
+                      >
+                        <Text style={[styles.estadoChipTexto, activo && styles.chipTextSelected]}>
+                          {e.nombre}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {actualizando === p.idPerfume && <ActivityIndicator size="small" color="#5b8def" />}
+                </View>
+              </View>
+            ))}
+          </View>
+        );
+      })}
     </ScrollView>
   );
 }
@@ -188,6 +298,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingTop: 40,
+    paddingBottom: 40,
     backgroundColor: "#111111",
     flexGrow: 1,
   },
@@ -250,7 +361,6 @@ const styles = StyleSheet.create({
   },
   boton: {
     marginTop: 32,
-    marginBottom: 40,
     backgroundColor: "#5b8def",
     borderRadius: 10,
     paddingVertical: 14,
@@ -263,5 +373,74 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "700",
+  },
+  seccion: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 36,
+    marginBottom: 4,
+  },
+  grupo: {
+    color: "#888888",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  vacio: {
+    color: "#888888",
+    fontSize: 14,
+    fontStyle: "italic",
+    marginTop: 8,
+  },
+  item: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  itemCabecera: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  itemTexto: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  itemNombre: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  itemDetalle: {
+    color: "#888888",
+    fontSize: 13,
+    marginTop: 2,
+  },
+  estadoRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 10,
+  },
+  estadoChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#333333",
+  },
+  estadoChipActivo: {
+    backgroundColor: "#5b8def",
+    borderColor: "#5b8def",
+  },
+  estadoChipTexto: {
+    color: "#aaaaaa",
+    fontSize: 12,
   },
 });
