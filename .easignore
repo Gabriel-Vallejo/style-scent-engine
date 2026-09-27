@@ -1,12 +1,24 @@
 # Qué sube EAS Build a sus servidores al compilar la app.
 #
 # OJO: si este fichero existe, EAS deja de respetar TODOS los .gitignore del repo.
-# Por eso se excluye todo menos frontend/ (lo único que necesita el build) y se
-# repiten aquí las reglas de frontend/.gitignore. Así nunca se suben backend/.env,
-# el APK ya compilado (~80 MB) ni el entorno virtual de Python.
+# Por eso se excluye aquí todo lo que no es frontend/ (lo único que necesita el
+# build) y se repiten las reglas de frontend/.gitignore. Así nunca se suben
+# backend/.env, el APK ya compilado (~80 MB) ni el entorno virtual de Python.
+# Sin negaciones (!): EAS no las aplica como git y con "/*" + "!/frontend/"
+# el archivo del build llegaba vacío.
 
-/*
-!/frontend/
+# Todo lo que no es la app
+/backend/
+/vision-service/
+/database/
+/.github/
+/.idea/
+/.claude/
+/docker-compose.yml
+/CONTEXT.md
+/README.md
+/LICENSE
+*.apk
 
 # Reglas de frontend/.gitignore
 /frontend/node_modules/
@@ -31,4 +43,3 @@ yarn-error.*
 *.pem
 .env*
 *.tsbuildinfo
-*.apk
