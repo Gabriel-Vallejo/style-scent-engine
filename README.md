@@ -11,6 +11,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Motor de puntuación (`StyleScentService`) con tests unitarios
 - [x] Frontend React Native (Expo) con formularios dinámicos y conexión en red local
 - [x] Registro de perfumes desde el móvil
+- [x] Gestión desde el móvil: listar y borrar prendas/perfumes, cambiar el estado de un perfume
 - [ ] Microservicio de visión artificial (Fase 2)
 
 ## Arquitectura
@@ -49,8 +50,11 @@ MySQL 8.0, normalizada en 3FN. Tablas principales:
 | `POST` | `/api/match/recomendar` | Puntúa el outfit contra todos los perfumes en colección y devuelve el ranking de mejor a peor. |
 | `GET` | `/api/prendas` | Lista las prendas registradas. |
 | `POST` | `/api/prendas` | Registra una nueva prenda validando sus relaciones (categoría, color, estilos). |
-| `GET` | `/api/perfumes` | Lista los perfumes en colección (los de "Lista de deseos" / "En camino" no se recomiendan). |
+| `DELETE` | `/api/prendas/{id}` | Borra una prenda (y sus estilos, en cascada). |
+| `GET` | `/api/perfumes` | Lista los perfumes en colección (los de "Lista de deseos" / "En camino" no se recomiendan). Con `?todos=true` devuelve todos. |
 | `POST` | `/api/perfumes` | Registra un perfume validando familia olfativa, estado y notas. |
+| `PATCH` | `/api/perfumes/{id}/estado` | Cambia el estado de posesión (ej. de "En camino" a "En coleccion"). Cuerpo: `{"idEstado": 1}`. |
+| `DELETE` | `/api/perfumes/{id}` | Borra un perfume (y sus notas, en cascada). |
 | `GET` | `/api/categorias`, `/api/colores`, `/api/estilos` | Catálogos para el formulario de prendas. |
 | `GET` | `/api/familias`, `/api/notas`, `/api/estados` | Catálogos para el formulario de perfumes. |
 
@@ -106,5 +110,5 @@ curl -X POST http://localhost:8080/api/match/recomendar \
 ## Stack
 - **Base de datos**: MySQL 8.0 (Docker)
 - **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok
-- **Frontend**: TypeScript, React Native, Expo, React Navigation (bottom tabs), React Native Picker
+- **Frontend**: TypeScript, React Native, Expo, React Navigation (bottom tabs), Expo Vector Icons
 - **IA (Fase 2, próximamente)**: Python, FastAPI, OpenCV, scikit-learn

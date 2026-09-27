@@ -45,6 +45,10 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   al backend real, sin datos mock. Recomendar recarga datos al enfocarse.
   En Recomendar el perfume es opcional: sin perfume elegido llama a
   `/api/match/recomendar` y enseña el ganador + alternativas.
+  Las pestañas Prenda y Perfume tienen debajo del formulario la lista para
+  borrar (y, en perfumes, cambiar de estado con un toque).
+- `GET /api/perfumes` sin parámetros devuelve solo "En coleccion" a propósito
+  (es lo que usa Recomendar); la gestión usa `?todos=true`.
 - El desglose del match es estructurado (`detalles` con `tipo` y `puntos`),
   no strings: la app los pinta en verde/rojo según el signo.
 - Pendiente: Fase 2 (IA de visión artificial).
