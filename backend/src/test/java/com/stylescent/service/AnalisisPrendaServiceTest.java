@@ -84,6 +84,7 @@ class AnalisisPrendaServiceTest {
 
         assertThat(resultado.categoria()).isEqualTo(new SugerenciaDTO(1, "Torso", 0.96));
         assertThat(resultado.color()).isEqualTo(new SugerenciaDTO(1, "Marrón", 0.8));
+        assertThat(resultado.alternativasColor()).containsExactly(new SugerenciaDTO(2, "Negro", 0.2));
         assertThat(resultado.estilos()).containsExactly(
                 new SugerenciaDTO(1, "Streetwear", 0.6),
                 new SugerenciaDTO(3, "Casual", 0.4));
@@ -104,6 +105,7 @@ class AnalisisPrendaServiceTest {
         // Sin sugerencias válidas no se inventa nada: el usuario elige a mano
         assertThat(resultado.categoria()).isNull();
         assertThat(resultado.color()).isNull();
+        assertThat(resultado.alternativasColor()).isEmpty();
         assertThat(resultado.estilos()).isEmpty();
     }
 

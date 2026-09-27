@@ -7,6 +7,9 @@ import java.util.List;
 public record AnalisisPrendaDTO(
         SugerenciaDTO categoria,
         SugerenciaDTO color,
+        // Los siguientes colores más probables: un color apagado o mal iluminado
+        // suele estar a medio camino entre dos o tres del catálogo
+        List<SugerenciaDTO> alternativasColor,
         List<SugerenciaDTO> estilos,
         String colorDominanteHex
 ) {

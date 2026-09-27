@@ -49,6 +49,7 @@ export interface Sugerencia {
 export interface AnalisisPrenda {
   categoria: Sugerencia | null;
   color: Sugerencia | null;
+  alternativasColor: Sugerencia[];
   estilos: Sugerencia[];
   colorDominanteHex: string;
 }

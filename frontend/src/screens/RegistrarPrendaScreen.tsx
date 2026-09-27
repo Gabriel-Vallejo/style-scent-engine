@@ -228,6 +228,22 @@ export default function RegistrarPrendaScreen() {
                       </Text>
                     </View>
                   )}
+                  {analisis.alternativasColor.length > 0 && (
+                    <View style={styles.alternativasFila}>
+                      <Text style={styles.fotoAyuda}>¿O es…? </Text>
+                      {analisis.alternativasColor.map((c) => (
+                        <TouchableOpacity
+                          key={c.id}
+                          style={[styles.alternativaChip, idColor === c.id && styles.chipSelected]}
+                          onPress={() => setIdColor(c.id)}
+                        >
+                          <Text style={[styles.alternativaTexto, idColor === c.id && styles.chipTextSelected]}>
+                            {c.nombre}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
                   {analisis.estilos.length > 0 && (
                     <Text style={styles.fotoTexto}>
                       {analisis.estilos.map((e) => e.nombre).join(", ")}
@@ -505,6 +521,24 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: 12,
     marginTop: 2,
+  },
+  alternativasFila: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 2,
+  },
+  alternativaChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#333333",
+  },
+  alternativaTexto: {
+    color: "#aaaaaa",
+    fontSize: 12,
   },
   muestraColor: {
     width: 12,

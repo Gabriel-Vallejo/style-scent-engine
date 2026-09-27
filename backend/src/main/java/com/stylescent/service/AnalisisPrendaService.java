@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class AnalisisPrendaService {
 
+    private static final int ALTERNATIVAS_COLOR = 2;
+
     private final VisionClient visionClient;
     private final CategoriaRepository categoriaRepository;
     private final ColorRepository colorRepository;
@@ -65,12 +67,23 @@ public class AnalisisPrendaService {
                 .map(nombre -> new SugerenciaDTO(estilos.get(nombre), nombre, confianzaEstilo.getOrDefault(nombre, 0.0)))
                 .toList();
 
+        List<SugerenciaDTO> rankingColores = enCatalogo(analisis.colores(), colores);
+
         return new AnalisisPrendaDTO(
                 mejor(analisis.categorias(), categorias),
-                mejor(analisis.colores(), colores),
+                rankingColores.isEmpty() ? null : rankingColores.getFirst(),
+                rankingColores.stream().skip(1).limit(ALTERNATIVAS_COLOR).toList(),
                 estilosSugeridos,
                 analisis.colorDominanteHex()
         );
+    }
+
+    // Sugerencias que siguen existiendo en el catálogo, en el mismo orden
+    private static List<SugerenciaDTO> enCatalogo(List<AnalisisVision.Sugerencia> ranking, Map<String, Integer> ids) {
+        return ranking.stream()
+                .filter(s -> ids.containsKey(s.nombre()))
+                .map(s -> new SugerenciaDTO(ids.get(s.nombre()), s.nombre(), s.confianza()))
+                .toList();
     }
 
     // Primera sugerencia que exista en el catálogo (debería ser siempre la primera,
