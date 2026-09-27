@@ -1,0 +1,37 @@
+# Revisión semanal de dependencias. Las actualizaciones menores y de parches se
+# agrupan en un solo PR por ecosistema para no llenar el repo de PRs.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    groups:
+      menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pip
+    directory: /vision-service
+    schedule:
+      interval: weekly
+    groups:
+      menores:
+        update-types: [minor, patch]
+
+  # Las versiones de Expo van ligadas al SDK: se actualizan con `npx expo install --fix`,
+  # así que aquí solo se piden los avisos de seguridad (0 PRs de versiones normales)
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: docker
+    directory: /vision-service
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

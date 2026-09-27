@@ -1,5 +1,7 @@
 # Style & Scent Engine
 
+[![CI](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Gabriel-Vallejo/style-scent-engine/actions/workflows/ci.yml)
+
 Aplicación full-stack que analiza el outfit de un usuario y recomienda el perfume ideal de su colección, basándose en reglas de sinergia (estilo y color) y reglas de exclusión (notas olfativas vetadas). Las prendas se pueden registrar a mano o a partir de una foto, que analiza un microservicio de visión artificial.
 
 Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingeniería del Software.
@@ -181,6 +183,8 @@ npx eas-cli@latest build -p android --profile preview
 Al terminar, EAS da un enlace para descargar el APK. El perfil `preview` genera un APK firmado con una clave que guarda EAS.
 
 ## Tests
+
+El CI de GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) los ejecuta en cada push: el backend contra un MySQL cargado con `database/`, el servicio de visión con pytest y la app con `tsc` y ESLint. Dependabot revisa las dependencias cada semana.
 
 ```bash
 (cd backend && ./mvnw test)                        # 24 tests (necesita MySQL levantado)
