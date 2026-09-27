@@ -127,7 +127,7 @@ App ──foto──▶ Spring Boot ──foto + nombres del catálogo──▶ 
      prerrellenado     (el backend las traduce a IDs)
 ```
 
-- **Color**: OpenCV separa la prenda del fondo y k-means (scikit-learn) busca el color dominante en espacio Lab, que se compara con los colores del catálogo.
+- **Color**: OpenCV separa la prenda del fondo y k-means (scikit-learn) busca el color dominante en espacio Lab, que se compara con los colores del catálogo con CIEDE2000 (variante textil). La app muestra además los 2 colores más cercanos siguientes, por si la luz de la foto engaña.
 - **Categoría y estilos**: CLIP en modo zero-shot contra frases generadas a partir de los nombres del catálogo. No hay que entrenar nada: un estilo nuevo en la BD se reconoce en la siguiente petición.
 - El servicio no accede a la BD ni guarda las fotos, y la IA solo sugiere: el usuario confirma antes de registrar.
 

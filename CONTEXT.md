@@ -57,6 +57,9 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   del repo de Hugging Face solo tiene `.bin`). El Dockerfile la descarga al construir.
 - En el Dockerfile el usuario sin privilegios se crea antes de descargar el
   modelo: un `chown` posterior duplicaba ~600 MB en otra capa.
+- El color se compara con CIEDE2000 textil (kL = 2), no con la distancia
+  euclídea: con CIE76 un verde oliva apagado salía como gris. La app ofrece
+  además los 2 colores siguientes (`alternativasColor`).
 - El estilo es la sugerencia menos fiable (subjetivo, y con 22 opciones la
   probabilidad se reparte). Se sugieren los que tengan ≥ 50 % de la
   probabilidad del mejor, máximo 3.
@@ -71,6 +74,13 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   línea `Metro: exp://...`** antes de asumir que `client.ts` apunta bien.
 - La app funciona arrancando Expo con `npx expo start -c` (interactivo). Con
   `CI=1` el móvil daba "Failed to download remote update".
+- Desde que la app está vinculada a EAS (`owner` + `projectId` en app.json),
+  Metro pregunta "Log in / Proceed anonymously" cuando Expo Go la abre. Si
+  Metro corre en segundo plano sin nadie que conteste, el móvil se queda
+  cargando: arrancarlo con sesión iniciada (`EXPO_TOKEN`) o contestar la pregunta.
+- Subida de fotos: desde el SDK 57 el `fetch` global es `expo/fetch` y no acepta
+  `{ uri, name, type }` en FormData ("Unsupported FormDataPart
+  implementation"); hay que usar `new File(uri)` de `expo-file-system`.
 - **APK con EAS Build** (proyecto `@imtrucha/style-scent` en expo.dev, perfil
   `preview` de `frontend/eas.json`). La URL del backend se hornea en el APK vía
   `EXPO_PUBLIC_API_URL`; `usesCleartextTraffic` es obligatorio porque el backend
