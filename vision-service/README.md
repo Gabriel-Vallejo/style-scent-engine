@@ -13,7 +13,7 @@ Microservicio de visión artificial de Style & Scent Engine. Recibe la foto de u
 1. Separa la prenda del fondo con GrabCut, suponiendo que el borde de la foto es fondo. Si el PNG trae transparencia, usa el canal alfa, que es más exacto. Si GrabCut apenas encuentra prenda, se queda con el centro de la imagen.
 2. Agrupa los píxeles de la prenda con k-means (3 grupos) en espacio Lab, donde la distancia euclídea se parece a la diferencia de color que percibe el ojo (ΔE).
 3. Fusiona los grupos a menos de ΔE 12: con ruido, arrugas o sombras, k-means parte un mismo color en varios.
-4. El grupo mayor es el color dominante. Se compara con el RGB de referencia de cada color del catálogo y la confianza sale de la distancia.
+4. El grupo mayor es el color dominante. Se compara con el RGB de referencia de cada color del catálogo usando **CIEDE2000 con el factor textil kL = 2**, que resta peso a la luminosidad: la luz de una foto cambia mucho más la luminosidad que el tono, y con la distancia euclídea (CIE76) un verde oliva apagado quedaba más cerca de un gris. La confianza sale de la distancia.
 
 **Categoría y estilos (CLIP zero-shot)** — `app/clasificador.py`
 
@@ -92,4 +92,4 @@ Para arrancarlo en local (descarga el modelo la primera vez, ~600 MB):
 
 - **El estilo es la sugerencia menos fiable:** es subjetivo, y con 22 estilos la probabilidad se reparte. Hay que tomarlo como una pista.
 - **El color depende de la luz de la foto:** una prenda blanca en sombra puede salir *Gris claro*. La segunda opción suele ser la correcta.
-- **Con 43 colores, las confianzas son bajas (15-30 %)** aunque el primer resultado sea correcto: se reparten entre muchas opciones.
+- **Con 43 colores, las confianzas son bajas (15-35 %)** aunque el primer resultado sea correcto: se reparten entre muchas opciones. Por eso la app ofrece también los 2 colores siguientes con un toque.

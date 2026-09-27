@@ -2,8 +2,10 @@
 k-means (scikit-learn) agrupa sus píxeles; el grupo más grande es el color
 dominante, que se compara en espacio Lab con los colores del catálogo.
 
-Lab en vez de RGB porque en Lab la distancia euclídea se parece a la diferencia
-de color que percibe el ojo (ΔE), así "el más cercano" tiene sentido.
+Lab en vez de RGB porque en Lab la distancia se parece a la diferencia de color
+que percibe el ojo (ΔE), así "el más cercano" tiene sentido. Para agrupar píxeles
+basta la distancia euclídea (CIE76); para compararlos con el catálogo se usa
+CIEDE2000 con el factor textil kL = 2 (ver puntuar_colores).
 """
 
 import math
@@ -20,8 +22,11 @@ MAX_PIXELES_KMEANS = 5000
 NUM_CLUSTERS = 3
 # Por debajo de este ΔE dos grupos se consideran el mismo color (≈ diferencia apenas perceptible)
 UMBRAL_FUSION = 12.0
-# Escala de la confianza: con ΔE = 15 la similitud cae a ~37 % de la de un match perfecto
-ESCALA_DELTA_E = 15.0
+# Escala de la confianza: con ΔE00 = 7 la similitud cae a ~37 % de la de un match perfecto
+ESCALA_DELTA_E = 7.0
+# Factor de luminosidad de CIEDE2000 para textiles (ISO 105-J03 / CMC usan 2): la
+# luz y las sombras de una foto cambian mucho más la luminosidad que el tono
+KL_TEXTIL = 2.0
 
 
 def decodificar(datos: bytes) -> np.ndarray:
@@ -124,8 +129,47 @@ def _fusionar_similares(centros: np.ndarray, etiquetas: np.ndarray) -> np.ndarra
     return np.array(grupo_de)[etiquetas]
 
 
+def ciede2000(lab: np.ndarray, referencias: np.ndarray, kL: float = 1.0) -> np.ndarray:
+    """ΔE00 entre un color Lab (3,) y varios (N, 3). Fórmula de Sharma, Wu y Dalal
+    (2005). Con CIE76 un verde oliva apagado quedaba más cerca de un gris que de
+    un verde, porque la luminosidad pesaba tanto como el tono."""
+    L1, a1, b1 = lab
+    L2, a2, b2 = referencias[:, 0], referencias[:, 1], referencias[:, 2]
+    c_media = (np.hypot(a1, b1) + np.hypot(a2, b2)) / 2
+    g = 0.5 * (1 - np.sqrt(c_media**7 / (c_media**7 + 25.0**7)))
+    a1p, a2p = (1 + g) * a1, (1 + g) * a2
+    c1p, c2p = np.hypot(a1p, b1), np.hypot(a2p, b2)
+    h1p = np.degrees(np.arctan2(b1, a1p)) % 360
+    h2p = np.degrees(np.arctan2(b2, a2p)) % 360
+
+    d_l = L2 - L1
+    d_c = c2p - c1p
+    dh = h2p - h1p
+    sin_croma = c1p * c2p == 0
+    dh = np.where(sin_croma, 0, np.where(dh > 180, dh - 360, np.where(dh < -180, dh + 360, dh)))
+    d_h = 2 * np.sqrt(c1p * c2p) * np.sin(np.radians(dh / 2))
+
+    l_media = (L1 + L2) / 2
+    cp_media = (c1p + c2p) / 2
+    suma_h = h1p + h2p
+    h_media = np.where(sin_croma, suma_h,
+                       np.where(np.abs(h1p - h2p) <= 180, suma_h / 2,
+                                np.where(suma_h < 360, (suma_h + 360) / 2, (suma_h - 360) / 2)))
+    t = (1 - 0.17 * np.cos(np.radians(h_media - 30)) + 0.24 * np.cos(np.radians(2 * h_media))
+         + 0.32 * np.cos(np.radians(3 * h_media + 6)) - 0.20 * np.cos(np.radians(4 * h_media - 63)))
+    d_theta = 30 * np.exp(-(((h_media - 275) / 25) ** 2))
+    r_c = 2 * np.sqrt(cp_media**7 / (cp_media**7 + 25.0**7))
+    s_l = 1 + (0.015 * (l_media - 50) ** 2) / np.sqrt(20 + (l_media - 50) ** 2)
+    s_c = 1 + 0.045 * cp_media
+    s_h = 1 + 0.015 * cp_media * t
+    r_t = -np.sin(np.radians(2 * d_theta)) * r_c
+
+    return np.sqrt((d_l / (kL * s_l)) ** 2 + (d_c / s_c) ** 2 + (d_h / s_h) ** 2
+                   + r_t * (d_c / s_c) * (d_h / s_h))
+
+
 def puntuar_colores(rgb: tuple[int, int, int], nombres: list[str]) -> list[tuple[str, float]] | None:
-    """Confianza de cada color del catálogo según su cercanía (ΔE en Lab) al color
+    """Confianza de cada color del catálogo según su cercanía (ΔE00 textil) al color
     detectado, ordenado de más a menos probable. None si ningún nombre del
     catálogo tiene color de referencia (entonces decide CLIP)."""
     conocidos = [n for n in nombres if normalizar(n) in COLORES_RGB]
@@ -134,7 +178,7 @@ def puntuar_colores(rgb: tuple[int, int, int], nombres: list[str]) -> list[tuple
 
     detectado = _a_lab(np.array([rgb]))[0]
     referencias = _a_lab(np.array([COLORES_RGB[normalizar(n)] for n in conocidos]))
-    distancias = np.linalg.norm(referencias - detectado, axis=1)
+    distancias = ciede2000(detectado, referencias, kL=KL_TEXTIL)
 
     similitudes = np.exp(-distancias / ESCALA_DELTA_E)
     total = similitudes.sum()

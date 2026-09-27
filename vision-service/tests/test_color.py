@@ -69,3 +69,29 @@ def test_png_transparente_usa_el_alfa_como_mascara():
     assert color.puntuar_colores(rgb, CATALOGO)[0][0] == "Negro"
     assert proporcion > 0.95
     assert color.sin_transparencia(imagen).shape[2] == 3
+
+
+@pytest.mark.parametrize(
+    "lab1, lab2, esperado",
+    [
+        ((50, 2.6772, -79.7751), (50, 0, -82.7485), 2.0425),
+        ((50, 2.5, 0), (50, 0, -2.5), 4.3065),
+        ((60.2574, -34.0099, 36.2677), (60.4626, -34.1751, 39.4387), 1.2644),
+        ((22.7233, 20.0904, -46.6940), (23.0331, 14.9730, -42.5619), 2.0373),
+    ],
+)
+def test_ciede2000_coincide_con_los_pares_de_referencia(lab1, lab2, esperado):
+    # Pares publicados por Sharma, Wu y Dalal (2005) para validar implementaciones
+    assert color.ciede2000(np.array(lab1), np.array([lab2]))[0] == pytest.approx(esperado, abs=1e-3)
+
+
+@pytest.mark.parametrize("rgb_prenda", [(95, 100, 50), (100, 102, 70), (105, 105, 80)])
+def test_verde_oliva_apagado_no_se_confunde_con_gris(rgb_prenda):
+    # Con CIE76 los olivas poco saturados quedaban más cerca de un gris
+    catalogo = ["Verde oliva", "Caqui", "Gris", "Gris oscuro", "Gris claro", "Negro", "Blanco"]
+    rgb, _ = color.color_dominante(foto_sintetica(rgb_prenda))
+
+    ranking = color.puntuar_colores(rgb, catalogo)
+
+    assert ranking[0][0] in ("Verde oliva", "Caqui")
+    assert not ranking[0][0].startswith("Gris")
