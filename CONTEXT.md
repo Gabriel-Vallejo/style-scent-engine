@@ -20,7 +20,8 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   `IllegalArgumentException` → 400. Cualquier excepción nueva de negocio debería
   añadirse ahí, no manejarse con try/catch ad-hoc en los controllers.
 - **`StyleScentService` es solo el motor de puntuación.** El CRUD de prendas vive
-  en `PrendaService` aparte — no mezclar responsabilidades ahí.
+  en `PrendaService` y el de perfumes en `PerfumeService` — no mezclar
+  responsabilidades ahí.
 - **IDs son `Integer` en todo el proyecto** (entidades, repos, DTOs), no `Long` —
   decisión deliberada para que coincida con el `INT AUTO_INCREMENT` de MySQL.
 
@@ -40,10 +41,10 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
 
 - Backend: CRUD de prendas completo, listado de perfumes, motor de puntuación
   con tests unitarios, endpoint `/api/match` funcionando.
-- Frontend: dos pestañas (Registrar prenda / Recomendar perfume), ambas
-  conectadas al backend real, sin datos mock.
-- Pendiente: registrar perfumes desde el móvil (por ahora solo prendas),
-  pulir la pantalla de resultado del match, Fase 2 (IA de visión artificial).
+- Frontend: tres pestañas (Prenda / Perfume / Recomendar), todas conectadas
+  al backend real, sin datos mock. Recomendar recarga datos al enfocarse.
+- Pendiente: pulir la pantalla de resultado del match, Fase 2 (IA de visión
+  artificial).
 
 ## Convenciones de commits / repo
 

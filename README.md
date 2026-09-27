@@ -10,7 +10,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Backend Java / Spring Boot con capa JPA completa y endpoints REST (registro de prendas, catálogos y matching)
 - [x] Motor de puntuación (`StyleScentService`) con tests unitarios
 - [x] Frontend React Native (Expo) con formularios dinámicos y conexión en red local
-- [ ] Registro de perfumes desde el móvil
+- [x] Registro de perfumes desde el móvil
 - [ ] Microservicio de visión artificial (Fase 2)
 
 ## Arquitectura
@@ -21,13 +21,13 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 │       ├── dto/         # Objetos de transferencia de datos (DTOs)
 │       ├── model/       # Entidades JPA
 │       ├── repository/  # Spring Data JPA
-│       ├── service/     # Motor de puntuación (StyleScentService) y CRUD de prendas (PrendaService)
+│       ├── service/     # Motor de puntuación (StyleScentService), PrendaService y PerfumeService
 │       └── exception/   # Manejo global de errores (GlobalExceptionHandler)
 ├── frontend/            # Aplicación móvil en React Native (Expo)
 │   ├── App.tsx          # Navegación por pestañas
 │   └── src/
 │       ├── api/         # Cliente HTTP hacia el backend
-│       ├── screens/     # Registrar prenda / Recomendar perfume
+│       ├── screens/     # Registrar prenda / Registrar perfume / Recomendar perfume
 │       └── types.ts     # Tipos compartidos con los DTOs del backend
 └── docker-compose.yml   # Contenedor MySQL 8.0
 ```
@@ -47,8 +47,10 @@ MySQL 8.0, normalizada en 3FN. Tablas principales:
 | `POST` | `/api/match` | Calcula el Match Score (0-100) de un conjunto de prendas con un perfume, con la explicación de cada suma/resta. |
 | `GET` | `/api/prendas` | Lista las prendas registradas. |
 | `POST` | `/api/prendas` | Registra una nueva prenda validando sus relaciones (categoría, color, estilos). |
-| `GET` | `/api/perfumes` | Lista los perfumes de la colección. |
-| `GET` | `/api/categorias`, `/api/colores`, `/api/estilos` | Catálogos para los selectores de la app móvil. |
+| `GET` | `/api/perfumes` | Lista los perfumes en colección (los de "Lista de deseos" / "En camino" no se recomiendan). |
+| `POST` | `/api/perfumes` | Registra un perfume validando familia olfativa, estado y notas. |
+| `GET` | `/api/categorias`, `/api/colores`, `/api/estilos` | Catálogos para el formulario de prendas. |
+| `GET` | `/api/familias`, `/api/notas`, `/api/estados` | Catálogos para el formulario de perfumes. |
 
 Errores: los recursos inexistentes devuelven `404` y las peticiones inválidas `400` (centralizado en `GlobalExceptionHandler`).
 
