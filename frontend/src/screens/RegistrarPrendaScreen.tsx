@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,8 +12,13 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { apiDelete, apiGet, apiPost } from "../api/client";
-import { CatalogoItem, PrendaResponse } from "../types";
+import * as ImagePicker from "expo-image-picker";
+import { apiDelete, apiGet, apiPost, apiUploadImagen } from "../api/client";
+import { AnalisisPrenda, CatalogoItem, PrendaResponse } from "../types";
+
+function porcentaje(confianza: number): string {
+  return `${Math.round(confianza * 100)} %`;
+}
 
 export default function RegistrarPrendaScreen() {
   const [nombre, setNombre] = useState("");
@@ -25,6 +31,11 @@ export default function RegistrarPrendaScreen() {
   const [idEstilos, setIdEstilos] = useState<number[]>([]);
 
   const [armario, setArmario] = useState<PrendaResponse[]>([]);
+
+  // Fase 2: foto analizada por el servicio de visión para prerrellenar el formulario
+  const [fotoUri, setFotoUri] = useState<string | null>(null);
+  const [analizando, setAnalizando] = useState(false);
+  const [analisis, setAnalisis] = useState<AnalisisPrenda | null>(null);
 
   const [cargandoCatalogos, setCargandoCatalogos] = useState(true);
   const [enviando, setEnviando] = useState(false);
@@ -82,6 +93,58 @@ export default function RegistrarPrendaScreen() {
     ]);
   }
 
+  async function elegirFoto(origen: "camara" | "galeria") {
+    const permiso =
+      origen === "camara"
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permiso.granted) {
+      Alert.alert("Sin permiso", "Necesito acceso para poder analizar la foto.");
+      return;
+    }
+
+    const opciones: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ["images"],
+      // Recortar a la prenda mejora mucho el análisis (menos fondo que confunda)
+      allowsEditing: true,
+      quality: 0.7,
+    };
+    const resultado =
+      origen === "camara"
+        ? await ImagePicker.launchCameraAsync(opciones)
+        : await ImagePicker.launchImageLibraryAsync(opciones);
+    if (resultado.canceled) return;
+
+    const foto = resultado.assets[0];
+    setFotoUri(foto.uri);
+    setAnalisis(null);
+    setAnalizando(true);
+    try {
+      const sugerencias = await apiUploadImagen<AnalisisPrenda>(
+        "/prendas/analizar",
+        foto.uri,
+        foto.mimeType
+      );
+      setAnalisis(sugerencias);
+      // Solo sugerencias: se preseleccionan y el usuario las cambia si no le convencen
+      if (sugerencias.categoria) setIdCategoria(sugerencias.categoria.id);
+      if (sugerencias.color) setIdColor(sugerencias.color.id);
+      if (sugerencias.estilos.length > 0) setIdEstilos(sugerencias.estilos.map((e) => e.id));
+    } catch (error) {
+      Alert.alert(
+        "No se pudo analizar",
+        `${(error as Error).message}\n\nPuedes rellenar el formulario a mano.`
+      );
+    } finally {
+      setAnalizando(false);
+    }
+  }
+
+  function quitarFoto() {
+    setFotoUri(null);
+    setAnalisis(null);
+  }
+
   function toggleEstilo(id: number) {
     setIdEstilos((prev) =>
       prev.includes(id) ? prev.filter((e) => e !== id) : [...prev, id]
@@ -119,6 +182,7 @@ export default function RegistrarPrendaScreen() {
       setIdCategoria(null);
       setIdColor(null);
       setIdEstilos([]);
+      quitarFoto();
       cargarArmario();
     } catch (error) {
       Alert.alert("Error al registrar", (error as Error).message);
@@ -139,6 +203,67 @@ export default function RegistrarPrendaScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.titulo}>Registrar prenda</Text>
+
+      <View style={styles.fotoCaja}>
+        {fotoUri ? (
+          <View style={styles.fotoFila}>
+            <Image source={{ uri: fotoUri }} style={styles.fotoMiniatura} />
+            <View style={styles.fotoInfo}>
+              {analizando ? (
+                <View style={styles.fotoFila}>
+                  <ActivityIndicator color="#5b8def" />
+                  <Text style={styles.fotoTexto}>  Analizando la prenda...</Text>
+                </View>
+              ) : analisis ? (
+                <>
+                  <Text style={styles.fotoTitulo}>Sugerencias de la IA</Text>
+                  {analisis.categoria && (
+                    <Text style={styles.fotoTexto}>
+                      {analisis.categoria.nombre} · {porcentaje(analisis.categoria.confianza)}
+                    </Text>
+                  )}
+                  {analisis.color && (
+                    <View style={styles.fotoFila}>
+                      <View
+                        style={[styles.muestraColor, { backgroundColor: analisis.colorDominanteHex }]}
+                      />
+                      <Text style={styles.fotoTexto}>
+                        {analisis.color.nombre} · {porcentaje(analisis.color.confianza)}
+                      </Text>
+                    </View>
+                  )}
+                  {analisis.estilos.length > 0 && (
+                    <Text style={styles.fotoTexto}>
+                      {analisis.estilos.map((e) => e.nombre).join(", ")}
+                    </Text>
+                  )}
+                  <Text style={styles.fotoAyuda}>Revísalas abajo antes de registrar.</Text>
+                </>
+              ) : null}
+            </View>
+            <TouchableOpacity onPress={quitarFoto} hitSlop={10} accessibilityLabel="Quitar foto">
+              <Ionicons name="close" size={20} color="#888888" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.fotoTitulo}>Rellenar con una foto</Text>
+            <Text style={styles.fotoAyuda}>
+              La IA sugiere la categoría, el color y los estilos. Tú confirmas.
+            </Text>
+            <View style={styles.fotoBotones}>
+              <TouchableOpacity style={styles.fotoBoton} onPress={() => elegirFoto("camara")}>
+                <Ionicons name="camera-outline" size={18} color="#5b8def" />
+                <Text style={styles.fotoBotonTexto}>Hacer foto</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.fotoBoton} onPress={() => elegirFoto("galeria")}>
+                <Ionicons name="images-outline" size={18} color="#5b8def" />
+                <Text style={styles.fotoBotonTexto}>Galería</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
 
       <Text style={styles.label}>Nombre</Text>
       <TextInput
@@ -346,5 +471,72 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: 13,
     marginTop: 2,
+  },
+  fotoCaja: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#333333",
+    borderStyle: "dashed",
+    padding: 14,
+    marginBottom: 8,
+  },
+  fotoFila: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  fotoMiniatura: {
+    width: 72,
+    height: 72,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: "#333333",
+  },
+  fotoInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  fotoTitulo: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  fotoTexto: {
+    color: "#cccccc",
+    fontSize: 13,
+  },
+  fotoAyuda: {
+    color: "#888888",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  muestraColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+    borderWidth: 1,
+    borderColor: "#555555",
+  },
+  fotoBotones: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+  },
+  fotoBoton: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#5b8def",
+    borderRadius: 8,
+    paddingVertical: 10,
+  },
+  fotoBotonTexto: {
+    color: "#5b8def",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

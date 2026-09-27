@@ -39,3 +39,16 @@ export interface Recomendacion {
   perfume: PerfumeItem;
   resultado: MatchResult;
 }
+
+export interface Sugerencia {
+  id: number;
+  nombre: string;
+  confianza: number;
+}
+
+export interface AnalisisPrenda {
+  categoria: Sugerencia | null;
+  color: Sugerencia | null;
+  estilos: Sugerencia[];
+  colorDominanteHex: string;
+}

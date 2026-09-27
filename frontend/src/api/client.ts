@@ -51,3 +51,21 @@ export async function apiDelete(path: string): Promise<void> {
     throw new Error(message);
   }
 }
+
+// Sube una foto como multipart/form-data. En React Native el "archivo" es un
+// objeto { uri, name, type } que fetch lee del disco del móvil.
+export async function apiUploadImagen<T>(path: string, uri: string, mimeType?: string | null): Promise<T> {
+  const nombre = uri.split("/").pop() ?? "foto.jpg";
+  const formData = new FormData();
+  formData.append("imagen", { uri, name: nombre, type: mimeType ?? "image/jpeg" } as unknown as Blob);
+
+  const response = await fetch(`${API_BASE_URL}${path}`, { method: "POST", body: formData });
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = data?.message ?? `Error ${response.status} al subir la imagen`;
+    throw new Error(message);
+  }
+
+  return data as T;
+}

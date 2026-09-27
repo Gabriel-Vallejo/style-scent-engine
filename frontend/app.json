@@ -20,6 +20,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceder a tus fotos para analizar tus prendas.",
+          "cameraPermission": "La app necesita la cámara para hacer fotos a tus prendas."
+        }
+      ]
+    ]
   }
 }
