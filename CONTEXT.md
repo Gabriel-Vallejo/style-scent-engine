@@ -33,8 +33,13 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   este documento) — **verificar cuál está usando Metro** (`Metro: exp://...`)
   antes de asumir que `client.ts` apunta bien.
 - MySQL corre en Docker, puerto `3307` del host → `3306` del contenedor.
-  Credenciales en `backend/.env` (gitignored), no hardcodeadas en `docker-compose.yml`.
-- Backend: `export DB_USERNAME=... DB_PASSWORD=...` antes de `./mvnw spring-boot:run`.
+  Credenciales en `backend/.env` (gitignored; plantilla en `backend/.env.example`).
+  Levantar con `docker compose --env-file backend/.env up -d`.
+- El esquema y los datos iniciales están en `database/` (montado en
+  `/docker-entrypoint-initdb.d`): solo se cargan si el volumen está vacío.
+  Si cambias el esquema en la BD, vuelve a exportarlo ahí.
+- Backend: Spring importa `backend/.env` directamente (`spring.config.import`),
+  basta con `./mvnw spring-boot:run` desde `backend/`.
 - Frontend: Expo (managed), no React Native CLI puro. `npx expo start` en `frontend/`.
 
 ## Estado actual (ver también README.md en la raíz)

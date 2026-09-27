@@ -31,11 +31,12 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 │       ├── components/  # Tarjeta de resultado del match
 │       ├── screens/     # Registrar prenda / Registrar perfume / Recomendar perfume
 │       └── types.ts     # Tipos compartidos con los DTOs del backend
+├── database/            # Esquema (01-schema.sql) y datos iniciales (02-datos.sql)
 └── docker-compose.yml   # Contenedor MySQL 8.0
 ```
 ## Base de datos
 
-MySQL 8.0, normalizada en 3FN. Tablas principales:
+MySQL 8.0, normalizada en 3FN. El esquema está en [`database/01-schema.sql`](database/01-schema.sql) y los catálogos, reglas y colección de ejemplo en [`database/02-datos.sql`](database/02-datos.sql). Tablas principales:
 
 - `perfumes` / `familias_olfativas` / `notas` / `perfume_nota` / `estados_posesion`
 - `prendas` / `categorias` / `colores` / `estilos` / `prenda_estilo`
@@ -75,15 +76,16 @@ Errores: los recursos inexistentes devuelven `404` y las peticiones inválidas `
 
 ### 1. Base de datos
 ```bash
-docker compose up -d
+cp backend/.env.example backend/.env   # y rellena las contraseñas
+docker compose --env-file backend/.env up -d
 ```
-MySQL queda expuesto en el puerto `3307` del host. Las credenciales se leen de `backend/.env` (no versionado).
+MySQL queda expuesto en el puerto `3307` del host. `backend/.env` no se versiona; lo leen tanto Docker como Spring Boot.
+
+La primera vez que se crea el volumen, MySQL carga automáticamente los scripts de `database/`. Para reiniciar la base de datos desde cero: `docker compose down -v && docker compose --env-file backend/.env up -d` (borra los datos actuales).
 
 ### 2. Backend (Java / Spring Boot)
 ```bash
 cd backend
-export DB_USERNAME=<usuario>   # ver backend/.env
-export DB_PASSWORD=<contraseña>
 ./mvnw spring-boot:run
 ```
 ### 3. Frontend (React Native / Expo)
