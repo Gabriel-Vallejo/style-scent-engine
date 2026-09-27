@@ -85,9 +85,9 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   `preview` de `frontend/eas.json`). La URL del backend se hornea en el APK vía
   `EXPO_PUBLIC_API_URL`; `usesCleartextTraffic` es obligatorio porque el backend
   va por HTTP. El APK se publica como GitHub Release (v1.0.0 la primera), no
-  en el repo: `*.apk` está en `.gitignore`. El historial conserva 4 APKs de
-  cuando se versionaban (~320 MB); no se ha reescrito el historial para no
-  romper clones. Proceso: subir `version` en app.json → `eas build` →
+  en el repo: `*.apk` está en `.gitignore`. Los APKs que se llegaron a
+  versionar se eliminaron del historial con `git filter-repo` (2026-09-27,
+  repo sin forks ni clones): .git pasó de 113 MB a ~1 MB. Proceso: subir `version` en app.json → `eas build` →
   `gh release create vX.Y.Z style-scent.apk`.
 - El token de EAS (EXPO_TOKEN) está en `~/.expo-token` (permisos 600, fuera del
   repo): `EXPO_TOKEN=$(cat ~/.expo-token) npx eas-cli@latest build ...`.
