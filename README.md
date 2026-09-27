@@ -44,7 +44,7 @@ MySQL 8.0, normalizada en 3FN. El esquema está en [`database/01-schema.sql`](da
 
 - `perfumes` / `familias_olfativas` / `notas` / `perfume_nota` / `estados_posesion`
 - `prendas` / `categorias` / `colores` / `estilos` / `prenda_estilo`
-- `sinergias_color` / `sinergias_estilo` — reglas de puntuación por color/estilo de la prenda contra la familia olfativa del perfume
+- `sinergias_color` / `sinergias_estilo` — reglas de puntuación por color/estilo de la prenda contra la familia olfativa del perfume (una por par, `UNIQUE`). Catálogo inicial: 29 colores, 10 estilos, 121 reglas
 - `filtros_exclusion` — notas que penalizan el score si el perfume las contiene
 
 ## Endpoints Principales

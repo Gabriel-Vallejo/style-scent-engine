@@ -10,6 +10,15 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   `sinergias_puntuacion` genérica. Se separaron porque el diseño original mezclaba
   reglas de color y de estilo en una tabla con texto libre (`atributo_ropa`), lo que
   causaba bugs de matching silenciosos.
+- **Bug histórico ya resuelto (2)**: `sinergias_estilo` tenía cada regla
+  triplicada (el script de carga se ejecutó 3 veces) y Streetwear puntuaba x3.
+  Ahora hay `UNIQUE (id_estilo, id_familia)` y `UNIQUE (id_color, id_familia)`.
+- **Catálogo ampliado** a 29 colores y 10 estilos, todos con reglas de
+  sinergia (criterios de perfumería habituales, escala 10-30, revisables).
+  Para añadir más: insertar reglas buscando por nombre (`JOIN ... ON f.nombre =
+  '...'`) y comprobar el número de filas insertadas, por el tema de las tildes.
+  Un color nuevo necesita además su RGB en `vision-service/app/etiquetas.py`
+  (y un estilo nuevo, idealmente, sus prompts ahí mismo).
 - **Bug histórico ya resuelto**: hubo un typo `'Ambar Fougere'` (sin tildes) en
   reglas de sinergia que nunca matcheaba con `'Ámbar Fougère'` en `familias_olfativas`.
   Si aparecen reglas que "no disparan", revisar tildes primero.
@@ -68,8 +77,9 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
     main del repo solo tiene `.bin`). El Dockerfile la descarga al construir.
   - Un color nuevo del catálogo necesita su RGB en `COLORES_RGB`
     (`etiquetas.py`); si ningún color tiene referencia, decide CLIP.
-  - Con solo 2 estilos en el catálogo, CLIP fuerza uno aunque no encaje:
-    el estilo es la sugerencia menos fiable.
+  - El estilo es la sugerencia menos fiable (subjetivo y con 10 opciones
+    que se reparten la probabilidad). Se sugieren los que tengan ≥ 50 % de la
+    probabilidad del mejor, máximo 3.
 
 ## Convenciones de commits / repo
 
