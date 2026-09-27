@@ -136,6 +136,7 @@ CREATE TABLE `sinergias_color` (
   `id_familia` int NOT NULL,
   `puntos_sumados` int NOT NULL,
   PRIMARY KEY (`id_regla`),
+  UNIQUE KEY `uq_sinergia_color` (`id_color`,`id_familia`),
   KEY `idx_sinergia_color` (`id_color`),
   KEY `idx_sinergia_familia` (`id_familia`),
   CONSTRAINT `fk_sinergia_color` FOREIGN KEY (`id_color`) REFERENCES `colores` (`id_color`),
@@ -150,7 +151,7 @@ CREATE TABLE `sinergias_estilo` (
   `id_familia` int NOT NULL,
   `puntos_sumados` int NOT NULL,
   PRIMARY KEY (`id_regla`),
-  KEY `id_estilo` (`id_estilo`),
+  UNIQUE KEY `uq_sinergia_estilo` (`id_estilo`,`id_familia`),
   KEY `id_familia` (`id_familia`),
   CONSTRAINT `sinergias_estilo_ibfk_1` FOREIGN KEY (`id_estilo`) REFERENCES `estilos` (`id_estilo`),
   CONSTRAINT `sinergias_estilo_ibfk_2` FOREIGN KEY (`id_familia`) REFERENCES `familias_olfativas` (`id_familia`)
