@@ -12,6 +12,6 @@ public interface SinergiaColorRepository extends JpaRepository<SinergiaColor, In
     // Todas las reglas para un color
     List<SinergiaColor> findByColor(Color color);
 
-    // Cambiado a List para admitir múltiples reglas sin romper el motor
+    // List por compatibilidad; con UNIQUE (id_color, id_familia) devuelve 0 o 1 regla
     List<SinergiaColor> findByColorAndFamilia(Color color, FamiliaOlfativa familia);
 }

@@ -4,6 +4,7 @@ import com.stylescent.dto.CambioEstadoRequestDTO;
 import com.stylescent.dto.PerfumeRequestDTO;
 import com.stylescent.dto.PerfumeResponseDTO;
 import com.stylescent.service.PerfumeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,12 +38,12 @@ public class PerfumeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PerfumeResponseDTO registrar(@RequestBody PerfumeRequestDTO request) {
+    public PerfumeResponseDTO registrar(@Valid @RequestBody PerfumeRequestDTO request) {
         return perfumeService.registrar(request);
     }
 
     @PatchMapping("/{id}/estado")
-    public PerfumeResponseDTO cambiarEstado(@PathVariable Integer id, @RequestBody CambioEstadoRequestDTO request) {
+    public PerfumeResponseDTO cambiarEstado(@PathVariable Integer id, @Valid @RequestBody CambioEstadoRequestDTO request) {
         return perfumeService.cambiarEstado(id, request.idEstado());
     }
 
