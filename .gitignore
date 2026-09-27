@@ -1,0 +1,9 @@
+# IDEs: configuración personal de cada máquina
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Credenciales y configuración local de Claude Code
+.env
+.claude/settings.local.json
