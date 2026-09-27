@@ -21,7 +21,21 @@ export interface PerfumeItem {
   estado: string;
 }
 
+export type TipoDetalle = "BASE" | "COLOR" | "ESTILO" | "EXCLUSION";
+
+export interface DetalleMatch {
+  tipo: TipoDetalle;
+  descripcion: string;
+  puntos: number;
+}
+
 export interface MatchResult {
   score: number;
-  mensajes: string[];
+  scoreSinAcotar: number;
+  detalles: DetalleMatch[];
+}
+
+export interface Recomendacion {
+  perfume: PerfumeItem;
+  resultado: MatchResult;
 }
