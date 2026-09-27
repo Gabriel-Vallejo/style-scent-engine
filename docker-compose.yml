@@ -9,7 +9,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3307:3306"
+      # Solo accesible desde este servidor (el backend corre aquí); para
+      # conectarte desde otro equipo usa un túnel SSH: ssh -L 3307:localhost:3307
+      - "127.0.0.1:3307:3306"
     volumes:
       - db_data:/var/lib/mysql
       # Esquema + datos iniciales; MySQL solo los ejecuta si db_data está vacío
