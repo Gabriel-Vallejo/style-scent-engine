@@ -17,5 +17,13 @@ services:
       # Esquema + datos iniciales; MySQL solo los ejecuta si db_data está vacío
       - ./database:/docker-entrypoint-initdb.d:ro
 
+  vision:
+    build: ./vision-service
+    container_name: style_scent_vision
+    restart: always
+    ports:
+      # Solo lo usa el backend, que corre en este mismo servidor
+      - "127.0.0.1:8001:8001"
+
 volumes:
   db_data:
