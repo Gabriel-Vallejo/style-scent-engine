@@ -43,8 +43,11 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
   con tests unitarios, endpoint `/api/match` funcionando.
 - Frontend: tres pestañas (Prenda / Perfume / Recomendar), todas conectadas
   al backend real, sin datos mock. Recomendar recarga datos al enfocarse.
-- Pendiente: pulir la pantalla de resultado del match, Fase 2 (IA de visión
-  artificial).
+  En Recomendar el perfume es opcional: sin perfume elegido llama a
+  `/api/match/recomendar` y enseña el ganador + alternativas.
+- El desglose del match es estructurado (`detalles` con `tipo` y `puntos`),
+  no strings: la app los pinta en verde/rojo según el signo.
+- Pendiente: Fase 2 (IA de visión artificial).
 
 ## Convenciones de commits / repo
 

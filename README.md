@@ -27,6 +27,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 │   ├── App.tsx          # Navegación por pestañas
 │   └── src/
 │       ├── api/         # Cliente HTTP hacia el backend
+│       ├── components/  # Tarjeta de resultado del match
 │       ├── screens/     # Registrar prenda / Registrar perfume / Recomendar perfume
 │       └── types.ts     # Tipos compartidos con los DTOs del backend
 └── docker-compose.yml   # Contenedor MySQL 8.0
@@ -45,6 +46,7 @@ MySQL 8.0, normalizada en 3FN. Tablas principales:
 | Método | Ruta | Descripción |
 |---|---|---|
 | `POST` | `/api/match` | Calcula el Match Score (0-100) de un conjunto de prendas con un perfume, con la explicación de cada suma/resta. |
+| `POST` | `/api/match/recomendar` | Puntúa el outfit contra todos los perfumes en colección y devuelve el ranking de mejor a peor. |
 | `GET` | `/api/prendas` | Lista las prendas registradas. |
 | `POST` | `/api/prendas` | Registra una nueva prenda validando sus relaciones (categoría, color, estilos). |
 | `GET` | `/api/perfumes` | Lista los perfumes en colección (los de "Lista de deseos" / "En camino" no se recomiendan). |
@@ -56,12 +58,14 @@ Errores: los recursos inexistentes devuelven `404` y las peticiones inválidas `
 
 ## Motor de puntuación
 
-`StyleScentService.calculateMatchScore(prendasIds, perfumeId)`:
+`StyleScentService` (solo puntúa; el CRUD vive en `PrendaService` / `PerfumeService`):
 
 1. Parte de una base de 50 puntos.
 2. Por cada prenda seleccionada, suma los puntos de `sinergias_color` (por su color) y `sinergias_estilo` (por cada estilo que tenga).
 3. Por cada nota del perfume presente en `filtros_exclusion`, resta la penalización configurada.
-4. Devuelve el score final (acotado entre 0 y 100) junto a un array de mensajes explicando cada suma/resta.
+4. Devuelve `score` (acotado entre 0 y 100), `scoreSinAcotar` y un desglose `detalles` con el tipo (`BASE`, `COLOR`, `ESTILO`, `EXCLUSION`), la descripción y los puntos de cada suma/resta.
+
+`recomendar(prendasIds)` aplica lo mismo a cada perfume "En coleccion" y ordena por `scoreSinAcotar`, para desempatar perfumes que llegan todos a 100.
 
 ## Cómo levantarlo
 
@@ -91,6 +95,12 @@ La URL del backend está en `frontend/src/api/client.ts`: debe apuntar a la IP d
 curl -X POST http://localhost:8080/api/match \
   -H "Content-Type: application/json" \
   -d '{"prendasIds": [1, 2], "perfumeId": 17}'
+```
+
+```bash
+curl -X POST http://localhost:8080/api/match/recomendar \
+  -H "Content-Type: application/json" \
+  -d '{"prendasIds": [1, 2]}'
 ```
 
 ## Stack
