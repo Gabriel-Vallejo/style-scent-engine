@@ -58,10 +58,13 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 ## Infraestructura y entorno
 
 - Todo corre en un servidor Linux (Pop!_OS) al que se accede por Remote-SSH /
-  JetBrains Gateway. La IP para SSH es `192.168.1.41`, pero la IP que usa Metro
-  para que el móvil vea el backend es otra interfaz (`192.168.1.44` a fecha de
-  este documento). **Verificar cuál está usando Metro** (`Metro: exp://...`)
-  antes de asumir que `client.ts` apunta bien.
+  JetBrains Gateway. A 2026-09-27 el servidor solo tiene una interfaz de red,
+  la wifi, con IP `192.168.1.44`: la misma para SSH, Metro y la app. Antes
+  había usado `192.168.1.41`, que ahora el router ha dado al móvil. Las IPs las
+  asigna el router y pueden cambiar: **verificar con `ip -4 addr` o con la
+  línea `Metro: exp://...`** antes de asumir que `client.ts` apunta bien.
+- La app funciona arrancando Expo con `npx expo start -c` (interactivo). Con
+  `CI=1` el móvil daba "Failed to download remote update".
 - `docker-compose.yml` levanta dos contenedores:
   - `style_scent_db` (MySQL 8.0): `127.0.0.1:3307` → `3306`.
   - `style_scent_vision` (FastAPI): `127.0.0.1:8001`.
