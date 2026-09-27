@@ -63,6 +63,7 @@ CREATE TABLE `filtros_exclusion` (
   `id_nota` int NOT NULL,
   `penalizacion_score` int NOT NULL,
   PRIMARY KEY (`id_filtro`),
+  UNIQUE KEY `uq_filtro_nota` (`id_nota`),
   KEY `idx_filtro_nota` (`id_nota`),
   CONSTRAINT `fk_filtro_nota` FOREIGN KEY (`id_nota`) REFERENCES `notas` (`id_nota`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
