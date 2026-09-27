@@ -45,7 +45,7 @@ export default function RegistrarPerfumeScreen() {
         setEstados(ests);
         // Lo normal es registrar algo que ya tienes: preseleccionamos el primer estado ("En coleccion")
         if (ests.length > 0) setIdEstado(ests[0].id);
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "No se pudieron cargar los catálogos. ¿Está el backend levantado?");
       } finally {
         setCargandoCatalogos(false);
@@ -57,7 +57,7 @@ export default function RegistrarPerfumeScreen() {
   const cargarColeccion = useCallback(async () => {
     try {
       setColeccion(await apiGet<PerfumeItem[]>("/perfumes?todos=true"));
-    } catch (error) {
+    } catch {
       // Sin backend ya avisa la carga de catálogos; aquí no repetimos el aviso
     }
   }, []);

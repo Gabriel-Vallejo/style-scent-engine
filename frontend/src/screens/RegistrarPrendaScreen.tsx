@@ -51,7 +51,7 @@ export default function RegistrarPrendaScreen() {
         setCategorias(cats);
         setColores(cols);
         setEstilos(ests);
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "No se pudieron cargar los catálogos. ¿Está el backend levantado?");
       } finally {
         setCargandoCatalogos(false);
@@ -63,7 +63,7 @@ export default function RegistrarPrendaScreen() {
   const cargarArmario = useCallback(async () => {
     try {
       setArmario(await apiGet<PrendaResponse[]>("/prendas"));
-    } catch (error) {
+    } catch {
       // Sin backend ya avisa la carga de catálogos; aquí no repetimos el aviso
     }
   }, []);

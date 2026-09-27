@@ -42,7 +42,7 @@ export default function RecomendarPerfumeScreen() {
           ]);
           setPrendas(listaPrendas);
           setPerfumes(listaPerfumes);
-        } catch (error) {
+        } catch {
           Alert.alert("Error", "No se pudieron cargar tus prendas y perfumes.");
         } finally {
           setCargando(false);
