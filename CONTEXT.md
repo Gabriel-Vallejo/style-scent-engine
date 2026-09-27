@@ -60,5 +60,6 @@ de la colección real del usuario, con un motor de puntuación basado en reglas.
 
 ## Convenciones de commits / repo
 
-- Repo privado en GitHub: `Gabriel-Vallejo/style-scent-engine`.
+- Repo **público** en GitHub: `Gabriel-Vallejo/style-scent-engine`. Nada de
+  credenciales, IPs públicas ni datos sensibles en código, docs o commits.
 - Rama principal: `main`.
