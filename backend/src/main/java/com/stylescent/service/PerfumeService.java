@@ -11,6 +11,7 @@ import com.stylescent.repository.FamiliaOlfativaRepository;
 import com.stylescent.repository.NotaRepository;
 import com.stylescent.repository.PerfumeRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,13 @@ public class PerfumeService {
     // recomendar un perfume que el usuario todavía no posee.
     public List<PerfumeResponseDTO> listarEnColeccion() {
         return perfumeRepository.findByEstado_Nombre("En coleccion").stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    // Para la pantalla de gestión: todos, incluidos "En camino" y "Lista de deseos"
+    public List<PerfumeResponseDTO> listarTodos() {
+        return perfumeRepository.findAll(Sort.by("nombre")).stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
@@ -80,6 +88,30 @@ public class PerfumeService {
 
         Perfume guardado = perfumeRepository.save(perfume);
         return toResponseDTO(guardado);
+    }
+
+    @Transactional
+    public PerfumeResponseDTO cambiarEstado(Integer idPerfume, Integer idEstado) {
+        if (idEstado == null) {
+            throw new IllegalArgumentException("Debes indicar el nuevo estado");
+        }
+        Perfume perfume = buscar(idPerfume);
+        EstadoPosesion estado = estadoRepository.findById(idEstado)
+                .orElseThrow(() -> new EntityNotFoundException("Estado no encontrado: id " + idEstado));
+
+        perfume.setEstado(estado);
+        return toResponseDTO(perfume);
+    }
+
+    @Transactional
+    public void eliminar(Integer idPerfume) {
+        // perfume_nota tiene ON DELETE CASCADE, y además es el lado propietario de la M:N
+        perfumeRepository.delete(buscar(idPerfume));
+    }
+
+    private Perfume buscar(Integer idPerfume) {
+        return perfumeRepository.findById(idPerfume)
+                .orElseThrow(() -> new EntityNotFoundException("Perfume no encontrado: id " + idPerfume));
     }
 
     // Público para que el motor de puntuación devuelva el perfume con el mismo formato

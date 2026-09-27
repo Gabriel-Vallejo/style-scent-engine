@@ -4,7 +4,9 @@ import com.stylescent.dto.PrendaRequestDTO;
 import com.stylescent.dto.PrendaResponseDTO;
 import com.stylescent.service.PrendaService;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +34,11 @@ public class PrendaController {
     @ResponseStatus(HttpStatus.CREATED)
     public PrendaResponseDTO registrar(@RequestBody PrendaRequestDTO request) {
         return prendaService.registrar(request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void eliminar(@PathVariable Integer id) {
+        prendaService.eliminar(id);
     }
 }

@@ -125,4 +125,44 @@ class PerfumeServiceTest {
                 .isInstanceOf(EntityNotFoundException.class);
         verify(perfumeRepository, never()).save(any());
     }
+
+    @Test
+    void cambiarEstado_actualizaElEstadoDelPerfume() {
+        EstadoPosesion enCamino = new EstadoPosesion();
+        enCamino.setIdEstado(2);
+        enCamino.setNombre("En camino");
+
+        Perfume perfume = new Perfume();
+        perfume.setIdPerfume(5);
+        perfume.setNombre("Vulcan Feu");
+        perfume.setFamilia(cuero);
+        perfume.setEstado(enCamino);
+
+        when(perfumeRepository.findById(5)).thenReturn(Optional.of(perfume));
+        when(estadoRepository.findById(1)).thenReturn(Optional.of(enColeccion));
+
+        PerfumeResponseDTO resultado = service.cambiarEstado(5, 1);
+
+        assertThat(resultado.estado()).isEqualTo("En coleccion");
+        assertThat(perfume.getEstado()).isSameAs(enColeccion);
+    }
+
+    @Test
+    void cambiarEstado_estadoInexistente_lanzaEntityNotFound() {
+        Perfume perfume = new Perfume();
+        when(perfumeRepository.findById(5)).thenReturn(Optional.of(perfume));
+        when(estadoRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.cambiarEstado(5, 99))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void eliminar_perfumeInexistente_lanzaEntityNotFound() {
+        when(perfumeRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.eliminar(99))
+                .isInstanceOf(EntityNotFoundException.class);
+        verify(perfumeRepository, never()).delete(any());
+    }
 }

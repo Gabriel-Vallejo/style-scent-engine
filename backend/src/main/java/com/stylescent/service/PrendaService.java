@@ -72,6 +72,14 @@ public class PrendaService {
         return toResponseDTO(guardada);
     }
 
+    @Transactional
+    public void eliminar(Integer idPrenda) {
+        Prenda prenda = prendaRepository.findById(idPrenda)
+                .orElseThrow(() -> new EntityNotFoundException("Prenda no encontrada: id " + idPrenda));
+        // prenda_estilo tiene ON DELETE CASCADE, y además es el lado propietario de la M:N
+        prendaRepository.delete(prenda);
+    }
+
     private PrendaResponseDTO toResponseDTO(Prenda prenda) {
         List<String> nombresEstilos = prenda.getEstilos().stream()
                 .map(Estilo::getNombre)
