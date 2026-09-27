@@ -2,6 +2,8 @@
 frontend/**/*.tsx linguist-language=TypeScript
 frontend/**/*.ts linguist-language=TypeScript
 
-# SQL es de tipo "data" para Linguist y no sale en la barra de lenguajes por defecto;
-# el esquema y los datos iniciales son parte real del proyecto, así que lo contamos
-database/*.sql linguist-detectable=true
+# SQL es de tipo "data" para Linguist y no sale en la barra de lenguajes por defecto.
+# El esquema es código real del proyecto, así que lo contamos; los datos iniciales
+# son un volcado de INSERTs generado con mysqldump y no deben inflar la estadística
+database/01-schema.sql linguist-detectable=true
+database/02-datos.sql linguist-generated=true
