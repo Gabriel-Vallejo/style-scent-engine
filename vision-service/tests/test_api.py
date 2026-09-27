@@ -53,7 +53,7 @@ def test_analizar_devuelve_sugerencias_ordenadas(cliente):
     assert cuerpo["colores"][0]["nombre"] == "Marrón"
     assert cuerpo["metodoColor"] == "kmeans"
     assert cuerpo["colorDominanteHex"].startswith("#")
-    # Streetwear es el más probable y Casual supera el umbral: los dos se sugieren
+    # Casual (0.4) tiene más de la mitad de la probabilidad de Streetwear (0.6): los dos
     assert cuerpo["estilosSugeridos"] == ["Streetwear", "Casual"]
 
 
@@ -63,6 +63,16 @@ def test_estilo_por_debajo_del_umbral_no_se_sugiere(cliente):
     r = cliente.post("/analizar", files={"imagen": ("f.jpg", jpg(), "image/jpeg")}, data=formulario())
 
     assert r.json()["estilosSugeridos"] == ["Streetwear"]
+
+
+def test_como_mucho_se_sugieren_tres_estilos(cliente):
+    estilos = ["A", "B", "C", "D", "E"]
+    cliente.falso.probabilidades.update({e: 0.2 for e in estilos})
+
+    r = cliente.post("/analizar", files={"imagen": ("f.jpg", jpg(), "image/jpeg")},
+                     data=formulario(estilos=estilos))
+
+    assert len(r.json()["estilosSugeridos"]) == 3
 
 
 def test_si_ningun_color_tiene_referencia_decide_clip(cliente):

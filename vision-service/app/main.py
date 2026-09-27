@@ -18,9 +18,11 @@ from .clasificador import ClasificadorClip
 from .etiquetas import prompts_categoria, prompts_color, prompts_estilo
 
 TAMANO_MAXIMO = 10 * 1024 * 1024
-# Un estilo se sugiere si es el más probable o si supera este umbral
-# (una prenda puede tener varios estilos, la relación es M:N)
-UMBRAL_ESTILO = 0.35
+# Una prenda puede tener varios estilos (M:N): además del más probable se sugieren
+# los que tengan al menos la mitad de su probabilidad. Relativo y no fijo porque con
+# 10 estilos la probabilidad se reparte y un umbral fijo casi nunca se alcanzaría.
+FRACCION_ESTILO = 0.5
+MAX_ESTILOS_SUGERIDOS = 3
 
 
 class Sugerencia(BaseModel):
@@ -101,7 +103,8 @@ async def analizar(
         ranking_colores = clasificador.clasificar(imagen_pil, {c: prompts_color(c) for c in colores})
         metodo_color = "clip"
 
-    sugeridos = [n for i, (n, p) in enumerate(ranking_estilos) if i == 0 or p >= UMBRAL_ESTILO]
+    prob_mejor = ranking_estilos[0][1]
+    sugeridos = [n for n, p in ranking_estilos if p >= prob_mejor * FRACCION_ESTILO][:MAX_ESTILOS_SUGERIDOS]
 
     return Analisis(
         categorias=_sugerencias(ranking_categorias),

@@ -40,6 +40,12 @@ COLORES_RGB: dict[str, tuple[int, int, int]] = {
     "naranja": (230, 125, 40),
     "amarillo": (235, 205, 60),
     "morado": (100, 55, 135),
+    "mostaza": (205, 160, 40),
+    "turquesa": (40, 175, 170),
+    "lila": (190, 160, 210),
+    "coral": (240, 120, 100),
+    "verde botella": (20, 70, 45),
+    "terracota": (190, 95, 65),
 }
 
 # Prompts en inglés por categoría. Varios por etiqueta ("prompt ensembling"):
@@ -102,6 +108,31 @@ PROMPTS_ESTILO: dict[str, list[str]] = {
     ],
     "clasico": [
         "a photo of classic timeless clothing",
+    ],
+    "minimalista": [
+        "a photo of minimalist clothing in plain neutral colors",
+        "clean simple minimal fashion without logos",
+    ],
+    "vintage": [
+        "a photo of vintage retro clothing",
+        "old-fashioned 70s 80s 90s style clothes",
+    ],
+    "rockero": [
+        "a photo of rock style clothing",
+        "punk rock leather and studs fashion",
+        "heavy metal band clothing",
+    ],
+    "preppy": [
+        "a photo of preppy clothing",
+        "ivy league polo shirt chinos and loafers",
+    ],
+    "workwear": [
+        "a photo of workwear clothing",
+        "rugged work jacket, canvas pants and work boots",
+    ],
+    "techwear": [
+        "a photo of techwear clothing",
+        "technical waterproof black urban outdoor gear",
     ],
 }
 
