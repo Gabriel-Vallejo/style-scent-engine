@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { apiGet, apiPost } from "../api/client";
 import { MatchResult, PerfumeItem, PrendaResponse } from "../types";
 
@@ -22,23 +23,27 @@ export default function RecomendarPerfumeScreen() {
   const [calculando, setCalculando] = useState(false);
   const [resultado, setResultado] = useState<MatchResult | null>(null);
 
-  useEffect(() => {
-    async function cargarDatos() {
-      try {
-        const [listaPrendas, listaPerfumes] = await Promise.all([
-          apiGet<PrendaResponse[]>("/prendas"),
-          apiGet<PerfumeItem[]>("/perfumes"),
-        ]);
-        setPrendas(listaPrendas);
-        setPerfumes(listaPerfumes);
-      } catch (error) {
-        Alert.alert("Error", "No se pudieron cargar tus prendas y perfumes.");
-      } finally {
-        setCargando(false);
+  // Recargamos cada vez que se entra en la pestaña: las pestañas no se desmontan,
+  // así que sin esto no aparecerían las prendas/perfumes recién registrados.
+  useFocusEffect(
+    useCallback(() => {
+      async function cargarDatos() {
+        try {
+          const [listaPrendas, listaPerfumes] = await Promise.all([
+            apiGet<PrendaResponse[]>("/prendas"),
+            apiGet<PerfumeItem[]>("/perfumes"),
+          ]);
+          setPrendas(listaPrendas);
+          setPerfumes(listaPerfumes);
+        } catch (error) {
+          Alert.alert("Error", "No se pudieron cargar tus prendas y perfumes.");
+        } finally {
+          setCargando(false);
+        }
       }
-    }
-    cargarDatos();
-  }, []);
+      cargarDatos();
+    }, [])
+  );
 
   function togglePrenda(id: number) {
     setResultado(null);

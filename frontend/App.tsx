@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import RegistrarPrendaScreen from "./src/screens/RegistrarPrendaScreen";
+import RegistrarPerfumeScreen from "./src/screens/RegistrarPerfumeScreen";
 import RecomendarPerfumeScreen from "./src/screens/RecomendarPerfumeScreen";
 
 const Tab = createBottomTabNavigator();
@@ -21,7 +22,8 @@ export default function App() {
             tabBarInactiveTintColor: "#888888",
           }}
         >
-          <Tab.Screen name="Registrar" component={RegistrarPrendaScreen} />
+          <Tab.Screen name="Prenda" component={RegistrarPrendaScreen} />
+          <Tab.Screen name="Perfume" component={RegistrarPerfumeScreen} />
           <Tab.Screen name="Recomendar" component={RecomendarPerfumeScreen} />
         </Tab.Navigator>
       </NavigationContainer>
