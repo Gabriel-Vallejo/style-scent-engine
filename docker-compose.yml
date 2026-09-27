@@ -12,6 +12,8 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
+      # Esquema + datos iniciales; MySQL solo los ejecuta si db_data está vacío
+      - ./database:/docker-entrypoint-initdb.d:ro
 
 volumes:
   db_data:
