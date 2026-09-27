@@ -197,14 +197,14 @@ class StyleScentServiceTest {
         sinergia.setPuntosSumados(30);
 
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(perfumeRepository.findByEstado_Nombre("En coleccion")).thenReturn(List.of(otro, perfume));
+        when(perfumeRepository.findByEstado_Nombre("En colección")).thenReturn(List.of(otro, perfume));
         when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of(sinergia));
         when(sinergiaColorRepository.findByColorAndFamilia(marron, citrica)).thenReturn(List.of());
         when(sinergiaEstiloRepository.findByEstiloAndFamilia(any(), any())).thenReturn(List.of());
         when(perfumeService.toResponseDTO(any(Perfume.class))).thenAnswer(inv -> {
             Perfume p = inv.getArgument(0);
             return new PerfumeResponseDTO(p.getIdPerfume(), p.getNombre(), null,
-                    p.getFamilia().getNombre(), List.of(), "En coleccion");
+                    p.getFamilia().getNombre(), List.of(), "En colección");
         });
 
         List<RecomendacionDTO> ranking = service.recomendar(List.of(1));
@@ -217,7 +217,7 @@ class StyleScentServiceTest {
     @Test
     void recomendarLanzaExcepcionSiNoHayPerfumesEnColeccion() {
         when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
-        when(perfumeRepository.findByEstado_Nombre("En coleccion")).thenReturn(List.of());
+        when(perfumeRepository.findByEstado_Nombre("En colección")).thenReturn(List.of());
 
         assertThatThrownBy(() -> service.recomendar(List.of(1)))
                 .isInstanceOf(EntityNotFoundException.class);

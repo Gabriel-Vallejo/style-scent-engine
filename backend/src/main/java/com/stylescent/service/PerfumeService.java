@@ -40,7 +40,7 @@ public class PerfumeService {
     // Solo los que tiene en mano, no la lista de deseos: no tiene sentido
     // recomendar un perfume que el usuario todavía no posee.
     public List<PerfumeResponseDTO> listarEnColeccion() {
-        return perfumeRepository.findByEstado_Nombre("En coleccion").stream()
+        return perfumeRepository.findByEstado_Nombre(EstadoPosesion.EN_COLECCION).stream()
                 .map(this::toResponseDTO)
                 .toList();
     }

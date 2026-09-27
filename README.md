@@ -20,7 +20,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 La app tiene tres pestañas:
 
 - **Prenda**: registrar una prenda (nombre, categoría, color y uno o varios estilos). Se puede rellenar con una foto (cámara o galería): la IA preselecciona categoría, color y estilos con su porcentaje de confianza y el usuario los confirma o corrige. Debajo, el armario con opción de borrar.
-- **Perfume**: registrar un perfume (nombre, marca, familia olfativa, notas y estado: *En coleccion*, *En camino* o *Lista de deseos*). Debajo, los perfumes agrupados por estado; se cambia de estado con un toque y se pueden borrar.
+- **Perfume**: registrar un perfume (nombre, marca, familia olfativa, notas y estado: *En colección*, *En camino* o *Lista de deseos*). Debajo, los perfumes agrupados por estado; se cambia de estado con un toque y se pueden borrar.
 - **Recomendar**: se elige el outfit y, opcionalmente, un perfume.
   - Con perfume: calcula su Match Score.
   - Sin perfume: puntúa toda la colección y muestra el mejor, con alternativas.
@@ -116,7 +116,7 @@ Los errores se centralizan en `GlobalExceptionHandler` y siempre devuelven `{tim
 3. Por cada nota del perfume presente en `filtros_exclusion`, resta la penalización configurada.
 4. Devuelve `score` (acotado entre 0 y 100), `scoreSinAcotar` y un desglose `detalles` con el tipo (`BASE`, `COLOR`, `ESTILO`, `EXCLUSION`), la descripción (qué prenda aporta cada punto) y los puntos.
 
-`recomendar(prendasIds)` aplica lo mismo a cada perfume *En coleccion* y ordena por `scoreSinAcotar`, para desempatar perfumes que llegan todos a 100.
+`recomendar(prendasIds)` aplica lo mismo a cada perfume *En colección* y ordena por `scoreSinAcotar`, para desempatar perfumes que llegan todos a 100.
 
 ## Visión artificial (Fase 2)
 

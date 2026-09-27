@@ -10,6 +10,10 @@ import lombok.Setter;
 @Setter
 public class EstadoPosesion {
 
+    // Único estado que cuenta para recomendar: lo que el usuario ya tiene.
+    // Debe coincidir exactamente (tildes incluidas) con la fila de estados_posesion.
+    public static final String EN_COLECCION = "En colección";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_estado")

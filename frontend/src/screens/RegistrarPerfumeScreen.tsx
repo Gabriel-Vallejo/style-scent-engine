@@ -43,7 +43,7 @@ export default function RegistrarPerfumeScreen() {
         setFamilias(fams);
         setNotas(nots);
         setEstados(ests);
-        // Lo normal es registrar algo que ya tienes: preseleccionamos el primer estado ("En coleccion")
+        // Lo normal es registrar algo que ya tienes: preseleccionamos el primer estado ("En colección")
         if (ests.length > 0) setIdEstado(ests[0].id);
       } catch {
         Alert.alert("Error", "No se pudieron cargar los catálogos. ¿Está el backend levantado?");
@@ -134,7 +134,7 @@ export default function RegistrarPerfumeScreen() {
         idNotas,
       });
       const aviso =
-        perfume.estado === "En coleccion"
+        perfume.estado === "En colección"
           ? "ya aparece en Recomendar."
           : `se guardó como "${perfume.estado}" (no se recomendará hasta que esté en tu colección).`;
       Alert.alert("Registrado", `"${perfume.nombre}" ${aviso}`);

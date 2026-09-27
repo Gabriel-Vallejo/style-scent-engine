@@ -42,7 +42,7 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   `AnalisisPrendaService`. No mezclar responsabilidades.
 - **IDs son `Integer` en todo el proyecto** (entidades, repos, DTOs), no `Long`:
   decisión deliberada para que coincida con el `INT AUTO_INCREMENT` de MySQL.
-- **`GET /api/perfumes` sin parámetros devuelve solo "En coleccion"** a propósito
+- **`GET /api/perfumes` sin parámetros devuelve solo "En colección"** a propósito
   (es lo que usa Recomendar); la gestión usa `?todos=true`.
 - **El desglose del match es estructurado** (`detalles` con `tipo` y `puntos`),
   no strings: la app los pinta en verde o rojo según el signo.

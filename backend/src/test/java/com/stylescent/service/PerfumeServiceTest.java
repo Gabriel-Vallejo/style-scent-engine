@@ -52,7 +52,7 @@ class PerfumeServiceTest {
 
         enColeccion = new EstadoPosesion();
         enColeccion.setIdEstado(1);
-        enColeccion.setNombre("En coleccion");
+        enColeccion.setNombre("En colección");
 
         cueroNota = new Nota();
         cueroNota.setIdNota(28);
@@ -81,7 +81,7 @@ class PerfumeServiceTest {
         assertThat(resultado.nombre()).isEqualTo("Ombré Leather");
         assertThat(resultado.marca()).isEqualTo("Tom Ford");
         assertThat(resultado.familia()).isEqualTo("Cuero");
-        assertThat(resultado.estado()).isEqualTo("En coleccion");
+        assertThat(resultado.estado()).isEqualTo("En colección");
         assertThat(resultado.notas()).containsExactlyInAnyOrder("Cuero", "Azafrán");
     }
 
@@ -143,7 +143,7 @@ class PerfumeServiceTest {
 
         PerfumeResponseDTO resultado = service.cambiarEstado(5, 1);
 
-        assertThat(resultado.estado()).isEqualTo("En coleccion");
+        assertThat(resultado.estado()).isEqualTo("En colección");
         assertThat(perfume.getEstado()).isSameAs(enColeccion);
     }
 

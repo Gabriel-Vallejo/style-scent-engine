@@ -12,6 +12,6 @@ public interface PerfumeRepository extends JpaRepository<Perfume, Integer> {
     List<Perfume> findByEstado(EstadoPosesion estado);
 
     // Filtrar directamente con el texto, sin cargar antes la entidad
-    // (ej: findByEstado_Nombre("En coleccion") / findByEstado_Nombre("Lista de deseos"))
+    // (ej: findByEstado_Nombre("En colección") / findByEstado_Nombre("Lista de deseos"))
     List<Perfume> findByEstado_Nombre(String nombre);
 }

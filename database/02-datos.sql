@@ -74,7 +74,7 @@ UNLOCK TABLES;
 LOCK TABLES `estados_posesion` WRITE;
 /*!40000 ALTER TABLE `estados_posesion` DISABLE KEYS */;
 INSERT INTO `estados_posesion` (`id_estado`, `nombre`) VALUES (2,'En camino');
-INSERT INTO `estados_posesion` (`id_estado`, `nombre`) VALUES (1,'En coleccion');
+INSERT INTO `estados_posesion` (`id_estado`, `nombre`) VALUES (1,'En colección');
 INSERT INTO `estados_posesion` (`id_estado`, `nombre`) VALUES (3,'Lista de deseos');
 /*!40000 ALTER TABLE `estados_posesion` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -269,7 +269,9 @@ INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (1,1);
 INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (2,1);
 INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (3,1);
 INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (4,1);
+INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (7,1);
 INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (4,3);
+INSERT INTO `prenda_estilo` (`id_prenda`, `id_estilo`) VALUES (8,34);
 /*!40000 ALTER TABLE `prenda_estilo` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,6 +281,8 @@ INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha
 INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha_registro`) VALUES (2,'Pantalón Baggy',2,2,'2026-09-26 11:27:20');
 INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha_registro`) VALUES (3,'Adidas Campus Bad Bunny',3,1,'2026-09-26 11:27:20');
 INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha_registro`) VALUES (4,'Ray-Ban Meta',5,5,'2026-09-26 12:09:07');
+INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha_registro`) VALUES (7,'Camiseta verde oversize',1,41,'2026-09-27 21:22:32');
+INSERT INTO `prendas` (`id_prenda`, `nombre`, `id_categoria`, `id_color`, `fecha_registro`) VALUES (8,'Camiseta gris claro oversize',1,34,'2026-09-27 21:35:07');
 /*!40000 ALTER TABLE `prendas` ENABLE KEYS */;
 UNLOCK TABLES;
 

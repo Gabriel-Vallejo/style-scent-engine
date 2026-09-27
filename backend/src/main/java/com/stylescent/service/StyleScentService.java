@@ -3,6 +3,7 @@ package com.stylescent.service;
 import com.stylescent.dto.DetalleMatchDTO;
 import com.stylescent.dto.MatchResultDTO;
 import com.stylescent.dto.RecomendacionDTO;
+import com.stylescent.model.EstadoPosesion;
 import com.stylescent.model.Estilo;
 import com.stylescent.model.FiltroExclusion;
 import com.stylescent.model.Nota;
@@ -76,7 +77,7 @@ public class StyleScentService {
         List<Prenda> prendas = cargarPrendas(prendasIds);
 
         // Mismo criterio que el listado: no se recomienda lo que aún no se tiene
-        List<Perfume> enColeccion = perfumeRepository.findByEstado_Nombre("En coleccion");
+        List<Perfume> enColeccion = perfumeRepository.findByEstado_Nombre(EstadoPosesion.EN_COLECCION);
         if (enColeccion.isEmpty()) {
             throw new EntityNotFoundException("No tienes perfumes en tu colección");
         }
