@@ -10,35 +10,47 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Backend Java / Spring Boot con capa JPA completa y endpoints REST (registro de prendas, catálogos y matching)
 - [x] Motor de puntuación (`StyleScentService`) con tests unitarios
 - [x] Frontend React Native (Expo) con formularios dinámicos y conexión en red local
+- [ ] Registro de perfumes desde el móvil
 - [ ] Microservicio de visión artificial (Fase 2)
 
 ## Arquitectura
 ```
-├── backend/            # API REST en Java + Spring Boot
+├── backend/             # API REST en Java + Spring Boot
 │   └── src/main/java/com/stylescent/
-│       ├── controller/  # Controladores REST (Prendas, catálogos)
+│       ├── controller/  # Controladores REST (match, prendas, perfumes, catálogos)
 │       ├── dto/         # Objetos de transferencia de datos (DTOs)
 │       ├── model/       # Entidades JPA
 │       ├── repository/  # Spring Data JPA
-│       ├── service/     # Lógica de negocio (motor de puntuación y registro)[cite: 5]
-│       └── exception/   # Manejo global de errores[cite: 5]
-├── frontend/           # Aplicación móvil en React Native (Expo)
-└── docker-compose.yml   # Contenedor MySQL 8.0[cite: 5]   
+│       ├── service/     # Motor de puntuación (StyleScentService) y CRUD de prendas (PrendaService)
+│       └── exception/   # Manejo global de errores (GlobalExceptionHandler)
+├── frontend/            # Aplicación móvil en React Native (Expo)
+│   ├── App.tsx          # Navegación por pestañas
+│   └── src/
+│       ├── api/         # Cliente HTTP hacia el backend
+│       ├── screens/     # Registrar prenda / Recomendar perfume
+│       └── types.ts     # Tipos compartidos con los DTOs del backend
+└── docker-compose.yml   # Contenedor MySQL 8.0
 ```
 ## Base de datos
 
-MySQL 8.0, normalizada en 3FN[cite: 5]. Tablas principales:
+MySQL 8.0, normalizada en 3FN. Tablas principales:
 
-- `perfumes` / `familias_olfativas` / `notas` / `perfume_nota` / `estados_posesion`[cite: 5]
-- `prendas` / `categorias` / `colores` / `estilos` / `prenda_estilo`[cite: 5]
-- `sinergias_color` / `sinergias_estilo` — reglas de puntuación por color/estilo de la prenda contra la familia olfativa del perfume[cite: 5]
-- `filtros_exclusion` — notas que penalizan el score si el perfume las contiene[cite: 5]
+- `perfumes` / `familias_olfativas` / `notas` / `perfume_nota` / `estados_posesion`
+- `prendas` / `categorias` / `colores` / `estilos` / `prenda_estilo`
+- `sinergias_color` / `sinergias_estilo` — reglas de puntuación por color/estilo de la prenda contra la familia olfativa del perfume
+- `filtros_exclusion` — notas que penalizan el score si el perfume las contiene
 
 ## Endpoints Principales
 
-- **POST /api/match**: Calcula el Match Score (0-100) combinando prendas y perfume con sus respectivas explicaciones[cite: 5].
-- **POST /api/prendas**: Registra una nueva prenda validando sus relaciones en la base de datos.
-- **GET /api/prendas/categorias**, **/colores**, **/estilos**: Proveen los catálogos dinámicos para los selectores de la app móvil.
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/match` | Calcula el Match Score (0-100) de un conjunto de prendas con un perfume, con la explicación de cada suma/resta. |
+| `GET` | `/api/prendas` | Lista las prendas registradas. |
+| `POST` | `/api/prendas` | Registra una nueva prenda validando sus relaciones (categoría, color, estilos). |
+| `GET` | `/api/perfumes` | Lista los perfumes de la colección. |
+| `GET` | `/api/categorias`, `/api/colores`, `/api/estilos` | Catálogos para los selectores de la app móvil. |
+
+Errores: los recursos inexistentes devuelven `404` y las peticiones inválidas `400` (centralizado en `GlobalExceptionHandler`).
 
 ## Motor de puntuación
 
@@ -55,18 +67,21 @@ MySQL 8.0, normalizada en 3FN[cite: 5]. Tablas principales:
 ```bash
 docker compose up -d
 ```
+MySQL queda expuesto en el puerto `3307` del host. Las credenciales se leen de `backend/.env` (no versionado).
+
 ### 2. Backend (Java / Spring Boot)
 ```bash
 cd backend
-export DB_USERNAME=app_user
-export DB_PASSWORD=app_password
+export DB_USERNAME=<usuario>   # ver backend/.env
+export DB_PASSWORD=<contraseña>
 ./mvnw spring-boot:run
 ```
-3. Frontend (React Native / Expo)
+### 3. Frontend (React Native / Expo)
 ```bash
 cd frontend
 npx expo start
 ```
+La URL del backend está en `frontend/src/api/client.ts`: debe apuntar a la IP de la máquina que muestra Metro (`exp://<ip>:8081`) para que el móvil llegue al backend.
 
 ## Probar el endpoint
 
@@ -77,11 +92,7 @@ curl -X POST http://localhost:8080/api/match \
 ```
 
 ## Stack
-- **Base de datos**: MySQL 8.0 (Docker)[cite: 5]
-
-- **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok[cite: 5]
-
-- **Frontend**: TypeScript, React Native, Expo, React Native Picker
-
-- **IA (Fase 2, próximamente)**: Python, FastAPI, OpenCV, scikit-learn[cite: 5]
-
+- **Base de datos**: MySQL 8.0 (Docker)
+- **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok
+- **Frontend**: TypeScript, React Native, Expo, React Navigation (bottom tabs), React Native Picker
+- **IA (Fase 2, próximamente)**: Python, FastAPI, OpenCV, scikit-learn
