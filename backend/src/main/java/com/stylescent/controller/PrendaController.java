@@ -5,6 +5,7 @@ import com.stylescent.dto.PrendaRequestDTO;
 import com.stylescent.dto.PrendaResponseDTO;
 import com.stylescent.service.AnalisisPrendaService;
 import com.stylescent.service.PrendaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +42,7 @@ public class PrendaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PrendaResponseDTO registrar(@RequestBody PrendaRequestDTO request) {
+    public PrendaResponseDTO registrar(@Valid @RequestBody PrendaRequestDTO request) {
         return prendaService.registrar(request);
     }
 

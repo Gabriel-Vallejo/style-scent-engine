@@ -11,6 +11,6 @@ public interface SinergiaEstiloRepository extends JpaRepository<SinergiaEstilo, 
 
     List<SinergiaEstilo> findByEstilo(Estilo estilo);
 
-    // Cambiado a List para admitir múltiples reglas de estilo sin romper el motor
+    // List por compatibilidad; con UNIQUE (id_estilo, id_familia) devuelve 0 o 1 regla
     List<SinergiaEstilo> findByEstiloAndFamilia(Estilo estilo, FamiliaOlfativa familia);
 }
