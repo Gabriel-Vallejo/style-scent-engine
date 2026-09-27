@@ -1,0 +1,3 @@
+# Forzar a GitHub a detectar TypeScript en el frontend
+frontend/**/*.tsx linguist-language=TypeScript
+frontend/**/*.ts linguist-language=TypeScript
