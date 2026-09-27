@@ -1,6 +1,8 @@
 package com.stylescent.service;
 
 import com.stylescent.dto.MatchResultDTO;
+import com.stylescent.dto.PerfumeResponseDTO;
+import com.stylescent.dto.RecomendacionDTO;
 import com.stylescent.model.Color;
 import com.stylescent.model.Estilo;
 import com.stylescent.model.FamiliaOlfativa;
@@ -30,6 +32,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +43,7 @@ class StyleScentServiceTest {
     @Mock private SinergiaColorRepository sinergiaColorRepository;
     @Mock private SinergiaEstiloRepository sinergiaEstiloRepository;
     @Mock private FiltroExclusionRepository filtroExclusionRepository;
+    @Mock private PerfumeService perfumeService;
 
     @InjectMocks
     private StyleScentService service;
@@ -91,8 +95,11 @@ class StyleScentServiceTest {
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
-        assertThat(resultado.getScore()).isEqualTo(80); // 50 base + 30
-        assertThat(resultado.getMensajes()).anyMatch(m -> m.contains("Marrón"));
+        assertThat(resultado.score()).isEqualTo(80); // 50 base + 30
+        assertThat(resultado.detalles()).anyMatch(d -> d.tipo().equals("COLOR")
+                && d.descripcion().contains("Chaqueta Leon S. Kennedy")
+                && d.descripcion().contains("Marrón")
+                && d.puntos() == 30);
     }
 
     @Test
@@ -107,7 +114,7 @@ class StyleScentServiceTest {
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
-        assertThat(resultado.getScore()).isEqualTo(70); // 50 base + 20
+        assertThat(resultado.score()).isEqualTo(70); // 50 base + 20
     }
 
     @Test
@@ -128,8 +135,11 @@ class StyleScentServiceTest {
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
-        assertThat(resultado.getScore()).isEqualTo(0); // 50 - 100, acotado a 0
-        assertThat(resultado.getMensajes()).anyMatch(m -> m.contains("Iris"));
+        assertThat(resultado.score()).isEqualTo(0); // 50 - 100, acotado a 0
+        assertThat(resultado.scoreSinAcotar()).isEqualTo(-50);
+        assertThat(resultado.detalles()).anyMatch(d -> d.tipo().equals("EXCLUSION")
+                && d.descripcion().contains("Iris")
+                && d.puntos() == -100);
     }
 
     @Test
@@ -144,14 +154,72 @@ class StyleScentServiceTest {
 
         MatchResultDTO resultado = service.calculateMatchScore(List.of(1), 17);
 
-        assertThat(resultado.getScore()).isEqualTo(100); // 50 + 80 = 130, acotado a 100
+        assertThat(resultado.score()).isEqualTo(100); // 50 + 80 = 130, acotado a 100
+        assertThat(resultado.scoreSinAcotar()).isEqualTo(130);
     }
 
     @Test
     void lanzaExcepcionSiElPerfumeNoExiste() {
+        when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
         when(perfumeRepository.findById(999)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.calculateMatchScore(List.of(1), 999))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void lanzaExcepcionSiNoHayPrendas() {
+        assertThatThrownBy(() -> service.calculateMatchScore(List.of(), 17))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void lanzaExcepcionSiAlgunaPrendaNoExiste() {
+        when(prendaRepository.findAllById(List.of(1, 999))).thenReturn(List.of(chaqueta));
+
+        assertThatThrownBy(() -> service.calculateMatchScore(List.of(1, 999), 17))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void recomendarOrdenaLosPerfumesEnColeccionDeMejorAPeor() {
+        FamiliaOlfativa citrica = new FamiliaOlfativa();
+        citrica.setIdFamilia(8);
+        citrica.setNombre("Cítrica Aromática");
+
+        Perfume otro = new Perfume();
+        otro.setIdPerfume(3);
+        otro.setNombre("Acqua di Gio");
+        otro.setFamilia(citrica);
+        otro.setNotas(new HashSet<>());
+
+        SinergiaColor sinergia = new SinergiaColor();
+        sinergia.setPuntosSumados(30);
+
+        when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
+        when(perfumeRepository.findByEstado_Nombre("En coleccion")).thenReturn(List.of(otro, perfume));
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, cuero)).thenReturn(List.of(sinergia));
+        when(sinergiaColorRepository.findByColorAndFamilia(marron, citrica)).thenReturn(List.of());
+        when(sinergiaEstiloRepository.findByEstiloAndFamilia(any(), any())).thenReturn(List.of());
+        when(perfumeService.toResponseDTO(any(Perfume.class))).thenAnswer(inv -> {
+            Perfume p = inv.getArgument(0);
+            return new PerfumeResponseDTO(p.getIdPerfume(), p.getNombre(), null,
+                    p.getFamilia().getNombre(), List.of(), "En coleccion");
+        });
+
+        List<RecomendacionDTO> ranking = service.recomendar(List.of(1));
+
+        assertThat(ranking).extracting(r -> r.perfume().idPerfume()).containsExactly(17, 3);
+        assertThat(ranking.get(0).resultado().score()).isEqualTo(80);
+        assertThat(ranking.get(1).resultado().score()).isEqualTo(50);
+    }
+
+    @Test
+    void recomendarLanzaExcepcionSiNoHayPerfumesEnColeccion() {
+        when(prendaRepository.findAllById(List.of(1))).thenReturn(List.of(chaqueta));
+        when(perfumeRepository.findByEstado_Nombre("En coleccion")).thenReturn(List.of());
+
+        assertThatThrownBy(() -> service.recomendar(List.of(1)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 }

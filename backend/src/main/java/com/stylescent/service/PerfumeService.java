@@ -82,7 +82,8 @@ public class PerfumeService {
         return toResponseDTO(guardado);
     }
 
-    private PerfumeResponseDTO toResponseDTO(Perfume perfume) {
+    // Público para que el motor de puntuación devuelva el perfume con el mismo formato
+    public PerfumeResponseDTO toResponseDTO(Perfume perfume) {
         List<String> nombresNotas = perfume.getNotas().stream()
                 .map(Nota::getNombre)
                 .toList();

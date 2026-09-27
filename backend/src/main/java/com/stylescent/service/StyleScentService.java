@@ -1,9 +1,8 @@
 package com.stylescent.service;
 
+import com.stylescent.dto.DetalleMatchDTO;
 import com.stylescent.dto.MatchResultDTO;
-import com.stylescent.dto.PrendaCreateDTO;
-import com.stylescent.model.Categoria;
-import com.stylescent.model.Color;
+import com.stylescent.dto.RecomendacionDTO;
 import com.stylescent.model.Estilo;
 import com.stylescent.model.FiltroExclusion;
 import com.stylescent.model.Nota;
@@ -11,9 +10,6 @@ import com.stylescent.model.Perfume;
 import com.stylescent.model.Prenda;
 import com.stylescent.model.SinergiaColor;
 import com.stylescent.model.SinergiaEstilo;
-import com.stylescent.repository.CategoriaRepository;
-import com.stylescent.repository.ColorRepository;
-import com.stylescent.repository.EstiloRepository;
 import com.stylescent.repository.FiltroExclusionRepository;
 import com.stylescent.repository.PerfumeRepository;
 import com.stylescent.repository.PrendaRepository;
@@ -24,58 +20,92 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+// Solo el motor de puntuación. El CRUD de prendas y perfumes vive en
+// PrendaService / PerfumeService.
 @Service
+@Transactional(readOnly = true)
 public class StyleScentService {
+
+    private static final int PUNTUACION_BASE = 50;
 
     private final PrendaRepository prendaRepository;
     private final PerfumeRepository perfumeRepository;
     private final SinergiaColorRepository sinergiaColorRepository;
     private final SinergiaEstiloRepository sinergiaEstiloRepository;
     private final FiltroExclusionRepository filtroExclusionRepository;
-
-    // Repositorios para registrar prendas
-    private final CategoriaRepository categoriaRepository;
-    private final ColorRepository colorRepository;
-    private final EstiloRepository estiloRepository;
+    private final PerfumeService perfumeService;
 
     public StyleScentService(PrendaRepository prendaRepository,
                              PerfumeRepository perfumeRepository,
                              SinergiaColorRepository sinergiaColorRepository,
                              SinergiaEstiloRepository sinergiaEstiloRepository,
                              FiltroExclusionRepository filtroExclusionRepository,
-                             CategoriaRepository categoriaRepository,
-                             ColorRepository colorRepository,
-                             EstiloRepository estiloRepository) {
+                             PerfumeService perfumeService) {
         this.prendaRepository = prendaRepository;
         this.perfumeRepository = perfumeRepository;
         this.sinergiaColorRepository = sinergiaColorRepository;
         this.sinergiaEstiloRepository = sinergiaEstiloRepository;
         this.filtroExclusionRepository = filtroExclusionRepository;
-        this.categoriaRepository = categoriaRepository;
-        this.colorRepository = colorRepository;
-        this.estiloRepository = estiloRepository;
+        this.perfumeService = perfumeService;
     }
-
-    private static final int PUNTUACION_BASE = 50;
 
     /**
      * Calcula el Match Score (0-100) de una combinación de prendas + un perfume.
      */
     public MatchResultDTO calculateMatchScore(List<Integer> prendasIds, Integer perfumeId) {
+        if (perfumeId == null) {
+            throw new IllegalArgumentException("Debes indicar un perfume");
+        }
+        List<Prenda> prendas = cargarPrendas(prendasIds);
         Perfume perfume = perfumeRepository.findById(perfumeId)
                 .orElseThrow(() -> new EntityNotFoundException("Perfume no encontrado: id " + perfumeId));
 
+        return puntuar(prendas, perfume);
+    }
+
+    /**
+     * Puntúa el outfit contra todos los perfumes en colección y los devuelve
+     * ordenados de mejor a peor match.
+     */
+    public List<RecomendacionDTO> recomendar(List<Integer> prendasIds) {
+        List<Prenda> prendas = cargarPrendas(prendasIds);
+
+        // Mismo criterio que el listado: no se recomienda lo que aún no se tiene
+        List<Perfume> enColeccion = perfumeRepository.findByEstado_Nombre("En coleccion");
+        if (enColeccion.isEmpty()) {
+            throw new EntityNotFoundException("No tienes perfumes en tu colección");
+        }
+
+        return enColeccion.stream()
+                .map(perfume -> new RecomendacionDTO(perfumeService.toResponseDTO(perfume), puntuar(prendas, perfume)))
+                .sorted(Comparator.comparingInt((RecomendacionDTO r) -> r.resultado().scoreSinAcotar()).reversed())
+                .toList();
+    }
+
+    private List<Prenda> cargarPrendas(List<Integer> prendasIds) {
+        if (prendasIds == null || prendasIds.isEmpty()) {
+            throw new IllegalArgumentException("Debes seleccionar al menos una prenda");
+        }
         List<Prenda> prendas = prendaRepository.findAllById(prendasIds);
+        if (prendas.size() != new HashSet<>(prendasIds).size()) {
+            throw new EntityNotFoundException("Alguna de las prendas indicadas no existe");
+        }
+        return prendas;
+    }
+
+    private MatchResultDTO puntuar(List<Prenda> prendas, Perfume perfume) {
+        String familia = perfume.getFamilia().getNombre();
 
         int score = PUNTUACION_BASE;
-        List<String> mensajes = new ArrayList<>();
-        mensajes.add("Puntuación base: " + PUNTUACION_BASE);
+        List<DetalleMatchDTO> detalles = new ArrayList<>();
+        detalles.add(new DetalleMatchDTO("BASE", "Puntuación base", PUNTUACION_BASE));
 
-        // Sinergias de color y estilo, prenda por prenda (usando List para evitar errores de unicidad)
+        // Sinergias de color y estilo, prenda por prenda (List para evitar errores de unicidad)
         for (Prenda prenda : prendas) {
             List<SinergiaColor> sinergiasColor =
                     sinergiaColorRepository.findByColorAndFamilia(prenda.getColor(), perfume.getFamilia());
@@ -83,8 +113,8 @@ public class StyleScentService {
             for (SinergiaColor sinergia : sinergiasColor) {
                 int puntos = sinergia.getPuntosSumados();
                 score += puntos;
-                mensajes.add(String.format("%s combina con perfume %s: %+d puntos",
-                        prenda.getColor().getNombre(), perfume.getFamilia().getNombre(), puntos));
+                detalles.add(new DetalleMatchDTO("COLOR", String.format("%s: color %s con %s",
+                        prenda.getNombre(), prenda.getColor().getNombre(), familia), puntos));
             }
 
             for (Estilo estilo : prenda.getEstilos()) {
@@ -94,8 +124,8 @@ public class StyleScentService {
                 for (SinergiaEstilo sinergia : sinergiasEstilo) {
                     int puntos = sinergia.getPuntosSumados();
                     score += puntos;
-                    mensajes.add(String.format("%s combina con perfume %s: %+d puntos",
-                            estilo.getNombre(), perfume.getFamilia().getNombre(), puntos));
+                    detalles.add(new DetalleMatchDTO("ESTILO", String.format("%s: estilo %s con %s",
+                            prenda.getNombre(), estilo.getNombre(), familia), puntos));
                 }
             }
         }
@@ -106,82 +136,12 @@ public class StyleScentService {
             if (filtro.isPresent()) {
                 int penalizacion = filtro.get().getPenalizacionScore();
                 score += penalizacion;
-                mensajes.add(String.format("Nota bloqueada '%s': %+d puntos", nota.getNombre(), penalizacion));
+                detalles.add(new DetalleMatchDTO("EXCLUSION",
+                        String.format("Nota bloqueada: %s", nota.getNombre()), penalizacion));
             }
         }
 
         int scoreFinal = Math.max(0, Math.min(100, score));
-        return new MatchResultDTO(scoreFinal, mensajes);
-    }
-
-    /**
-     * Registra una nueva prenda validando sus relaciones en la base de datos.
-     */
-    @Transactional
-    public Prenda registrarPrenda(PrendaCreateDTO dto) {
-        Prenda nuevaPrenda = new Prenda();
-        nuevaPrenda.setNombre(dto.getNombre());
-
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
-
-        Color color = colorRepository.findById(dto.getColorId())
-                .orElseThrow(() -> new RuntimeException("Color no encontrado"));
-
-        List<Estilo> estilos = estiloRepository.findAllById(dto.getEstilosIds());
-
-        nuevaPrenda.setCategoria(categoria);
-        nuevaPrenda.setColor(color);
-        nuevaPrenda.setEstilos(new HashSet<>(estilos));
-
-        return prendaRepository.save(nuevaPrenda);
-    }
-
-    // --- MÉTODOS PARA CATÁLOGOS (GET) ---
-
-    public List<Categoria> obtenerCategorias() {
-        return categoriaRepository.findAll();
-    }
-
-    public List<Color> obtenerColores() {
-        return colorRepository.findAll();
-    }
-
-    public List<Estilo> obtenerEstilos() {
-        return estiloRepository.findAll();
-    }
-
-    public List<Prenda> obtenerTodasLasPrendas() {
-        return prendaRepository.findAll();
-    }
-
-    /**
-     * Evalúa todas las prendas de un outfit contra todos los perfumes y devuelve el mejor match.
-     */
-    public MatchResultDTO recomendarMejorPerfume(List<Integer> prendasIds) {
-        List<Perfume> todosLosPerfumes = perfumeRepository.findAll();
-
-        if (todosLosPerfumes.isEmpty()) {
-            throw new RuntimeException("No hay perfumes registrados en la base de datos.");
-        }
-
-        Perfume mejorPerfume = null;
-        int maxScore = -1;
-        MatchResultDTO mejorResultado = null;
-
-        for (Perfume perfume : todosLosPerfumes) {
-            MatchResultDTO resultado = calculateMatchScore(prendasIds, perfume.getIdPerfume());
-            if (resultado.getScore() > maxScore) {
-                maxScore = resultado.getScore();
-                mejorPerfume = perfume;
-                mejorResultado = resultado;
-            }
-        }
-
-        if (mejorPerfume != null) {
-            mejorResultado.getMensajes().add(0, "✨ Perfume recomendado: " + mejorPerfume.getNombre());
-        }
-
-        return mejorResultado;
+        return new MatchResultDTO(scoreFinal, score, detalles);
     }
 }
