@@ -90,6 +90,6 @@ Para arrancarlo en local (descarga el modelo la primera vez, ~600 MB):
 
 ## Limitaciones conocidas
 
-- **El estilo es la sugerencia menos fiable:** es subjetivo, y con 10 estilos la probabilidad se reparte. Hay que tomarlo como una pista.
+- **El estilo es la sugerencia menos fiable:** es subjetivo, y con 22 estilos la probabilidad se reparte. Hay que tomarlo como una pista.
 - **El color depende de la luz de la foto:** una prenda blanca en sombra puede salir *Gris claro*. La segunda opción suele ser la correcta.
-- **Con 29 colores, las confianzas son bajas (20-40 %)** aunque el primer resultado sea correcto: se reparten entre muchas opciones.
+- **Con 43 colores, las confianzas son bajas (15-30 %)** aunque el primer resultado sea correcto: se reparten entre muchas opciones.

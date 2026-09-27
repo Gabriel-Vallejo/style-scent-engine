@@ -70,8 +70,8 @@ MySQL 8.0, normalizada en 3FN. El esquema está en [`database/01-schema.sql`](da
 | `perfumes`, `perfume_nota` | La colección de perfumes y sus notas (M:N) |
 | `familias_olfativas`, `notas`, `estados_posesion` | Catálogos de perfumes: 12 familias, 32 notas, 3 estados |
 | `prendas`, `prenda_estilo` | El armario; una prenda puede tener varios estilos (M:N) |
-| `categorias`, `colores`, `estilos` | Catálogos de prendas: 4 categorías, 29 colores, 10 estilos |
-| `sinergias_color`, `sinergias_estilo` | Puntos que suma cada color/estilo con cada familia olfativa (121 reglas, una por par gracias a `UNIQUE`) |
+| `categorias`, `colores`, `estilos` | Catálogos de prendas: 4 categorías, 43 colores, 22 estilos |
+| `sinergias_color`, `sinergias_estilo` | Puntos que suma cada color/estilo con cada familia olfativa (198 reglas, una por par gracias a `UNIQUE`) |
 | `filtros_exclusion` | Notas vetadas y cuánto restan si el perfume las contiene |
 
 Las tablas intermedias (`perfume_nota`, `prenda_estilo`) usan `ON DELETE CASCADE`.

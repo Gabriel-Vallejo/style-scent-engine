@@ -46,7 +46,25 @@ COLORES_RGB: dict[str, tuple[int, int, int]] = {
     "coral": (240, 120, 100),
     "verde botella": (20, 70, 45),
     "terracota": (190, 95, 65),
+    "fucsia": (215, 40, 135),
+    "rosa palo": (225, 190, 190),
+    "salmon": (245, 165, 135),
+    "granate": (125, 20, 30),
+    "berenjena": (70, 30, 60),
+    "lavanda": (200, 190, 230),
+    "azul electrico": (40, 90, 230),
+    "azul indigo": (45, 40, 110),
+    "azul petroleo": (25, 85, 100),
+    "verde menta": (165, 220, 190),
+    "verde lima": (170, 205, 50),
+    "amarillo pastel": (245, 235, 160),
+    "ocre": (195, 135, 45),
+    "chocolate": (65, 40, 25),
 }
+# Colores descartados por quedar a menos de ΔE 12 de uno existente (se confundirían):
+# antracita (gris oscuro), arena (beige), azul cielo (azul claro), cobre y teja
+# (terracota), gris perla (gris claro), hueso (crema), topo (gris),
+# verde militar (verde oliva), vino (burdeos).
 
 # Prompts en inglés por categoría. Varios por etiqueta ("prompt ensembling"):
 # se promedian sus embeddings, lo que da resultados más estables que uno solo.
@@ -134,7 +152,58 @@ PROMPTS_ESTILO: dict[str, list[str]] = {
         "a photo of techwear clothing",
         "technical waterproof black urban outdoor gear",
     ],
+    "bohemio": [
+        "a photo of bohemian boho clothing",
+        "flowy boho hippie outfit with fringe and earthy prints",
+    ],
+    "gotico": [
+        "a photo of gothic clothing",
+        "all black goth outfit with dark lace and chains",
+    ],
+    "skater": [
+        "a photo of skater clothing",
+        "skateboarding outfit with baggy pants, graphic tee and vans",
+    ],
+    "militar": [
+        "a photo of military style clothing",
+        "camouflage cargo army inspired outfit",
+    ],
+    "surfero": [
+        "a photo of surf style clothing",
+        "beach surfer outfit with board shorts and hawaiian shirt",
+    ],
+    "western": [
+        "a photo of western cowboy clothing",
+        "cowboy boots, denim and western shirt outfit",
+    ],
+    "y2k": [
+        "a photo of y2k fashion",
+        "early 2000s style outfit with low rise jeans and baby tee",
+    ],
+    "gorpcore": [
+        "a photo of gorpcore outdoor clothing",
+        "hiking fleece, trail shoes and outdoor jacket outfit",
+    ],
+    "grunge": [
+        "a photo of grunge clothing",
+        "90s grunge outfit with flannel shirt and ripped jeans",
+    ],
+    "nautico": [
+        "a photo of nautical clothing",
+        "navy and white striped sailor boat outfit",
+    ],
+    "harajuku": [
+        "a photo of harajuku japanese street fashion",
+        "colorful layered tokyo street style outfit",
+    ],
+    "romantico": [
+        "a photo of romantic clothing",
+        "soft pastel outfit with ruffles and lace",
+    ],
 }
+# Estilos descartados por solaparse con uno existente (CLIP los confundiría):
+# formal y clásico (elegante), punk (rockero), hip hop (streetwear),
+# athleisure (deportivo), old money (preppy).
 
 
 def prompts_categoria(nombre: str) -> list[str]:

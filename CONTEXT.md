@@ -18,7 +18,7 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 - **Bug histórico resuelto (2)**: `sinergias_estilo` tenía cada regla
   triplicada (el script de carga se ejecutó 3 veces) y Streetwear puntuaba x3.
   Ahora hay `UNIQUE (id_estilo, id_familia)` y `UNIQUE (id_color, id_familia)`.
-- **Catálogo**: 29 colores y 10 estilos, todos con reglas de sinergia (criterios
+- **Catálogo**: 43 colores y 22 estilos, todos con reglas de sinergia (criterios
   de perfumería habituales, escala 10-30, revisables por el usuario). Para
   añadir más: insertar las reglas buscando por nombre (`JOIN ... ON f.nombre =
   '...'`) y comprobar el número de filas insertadas (por las tildes). Un color
@@ -51,7 +51,7 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   del repo de Hugging Face solo tiene `.bin`). El Dockerfile la descarga al construir.
 - En el Dockerfile el usuario sin privilegios se crea antes de descargar el
   modelo: un `chown` posterior duplicaba ~600 MB en otra capa.
-- El estilo es la sugerencia menos fiable (subjetivo, y con 10 opciones la
+- El estilo es la sugerencia menos fiable (subjetivo, y con 22 opciones la
   probabilidad se reparte). Se sugieren los que tengan ≥ 50 % de la
   probabilidad del mejor, máximo 3.
 
