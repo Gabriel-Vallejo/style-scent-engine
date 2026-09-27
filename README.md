@@ -13,7 +13,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Motor de puntuación (`StyleScentService`) y recomendación del mejor perfume, con tests unitarios
 - [x] App móvil React Native (Expo): registro, gestión y recomendación
 - [x] Microservicio de visión artificial (Fase 2): sugiere categoría, color y estilos a partir de una foto
-- [x] APK nativo para Android ([`style-scent.apk`](style-scent.apk)), compilado con EAS Build
+- [x] APK nativo para Android ([descargar la última versión](https://github.com/Gabriel-Vallejo/style-scent-engine/releases/latest/download/style-scent.apk)), compilado con EAS Build
 
 ## Funcionalidades de la app
 
@@ -62,7 +62,6 @@ MySQL y el servicio de visión solo escuchan en `127.0.0.1`: el único punto de 
 │       ├── screens/         # Prenda / Perfume / Recomendar
 │       └── types.ts         # Tipos compartidos con los DTOs del backend
 ├── database/                # Esquema (01-schema.sql) y datos iniciales (02-datos.sql)
-├── style-scent.apk          # App Android lista para instalar
 └── docker-compose.yml       # MySQL + servicio de visión
 ```
 
@@ -162,9 +161,11 @@ La URL del backend está en `frontend/src/api/client.ts`: debe apuntar a la IP d
 
 ## Instalar la app en Android (APK)
 
-[`style-scent.apk`](style-scent.apk) es la app nativa: se instala en el móvil y funciona sin Expo Go ni Metro.
+La app nativa se publica en [Releases](https://github.com/Gabriel-Vallejo/style-scent-engine/releases): se instala en el móvil y funciona sin Expo Go ni Metro.
 
-1. Descarga el APK en el móvil (desde GitHub: abre el archivo y pulsa *Download raw file*).
+**[⬇ Descargar la última versión del APK](https://github.com/Gabriel-Vallejo/style-scent-engine/releases/latest/download/style-scent.apk)**
+
+1. Abre el enlace de descarga desde el móvil.
 2. Ábrelo. Android pedirá permitir "instalar apps de origen desconocido" para el navegador o el gestor de archivos: es normal en apps que no vienen de Google Play.
 3. El móvil tiene que estar en la **misma wifi que el servidor**, con el backend encendido.
 
@@ -180,7 +181,15 @@ npx eas-cli@latest login          # o exportar EXPO_TOKEN con un token de acceso
 npx eas-cli@latest build -p android --profile preview
 ```
 
-Al terminar, EAS da un enlace para descargar el APK. El perfil `preview` genera un APK firmado con una clave que guarda EAS.
+Al terminar, EAS da un enlace para descargar el APK. El perfil `preview` genera un APK firmado con una clave que guarda EAS, así que cada versión se instala encima de la anterior.
+
+Para publicarlo, sube `version` en `frontend/app.json` y crea la release con el APK adjunto:
+
+```bash
+gh release create v1.1.0 style-scent.apk --title "Style & Scent v1.1.0" --notes "Qué cambia"
+```
+
+El enlace de descarga de arriba apunta siempre a la última release.
 
 ## Tests
 

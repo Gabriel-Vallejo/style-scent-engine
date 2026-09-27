@@ -84,7 +84,13 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 - **APK con EAS Build** (proyecto `@imtrucha/style-scent` en expo.dev, perfil
   `preview` de `frontend/eas.json`). La URL del backend se hornea en el APK vía
   `EXPO_PUBLIC_API_URL`; `usesCleartextTraffic` es obligatorio porque el backend
-  va por HTTP. El APK compilado está en la raíz (`style-scent.apk`).
+  va por HTTP. El APK se publica como GitHub Release (v1.0.0 la primera), no
+  en el repo: `*.apk` está en `.gitignore`. El historial conserva 4 APKs de
+  cuando se versionaban (~320 MB); no se ha reescrito el historial para no
+  romper clones. Proceso: subir `version` en app.json → `eas build` →
+  `gh release create vX.Y.Z style-scent.apk`.
+- El token de EAS (EXPO_TOKEN) está en `~/.expo-token` (permisos 600, fuera del
+  repo): `EXPO_TOKEN=$(cat ~/.expo-token) npx eas-cli@latest build ...`.
 - Login de EAS por SSH: `eas login --sso` no funciona (redirige a `localhost`
   del navegador, que está en otro equipo). Usar usuario/contraseña o
   `EXPO_TOKEN` con un token de acceso; nunca pegar el token en el chat.

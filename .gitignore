@@ -7,3 +7,6 @@
 # Credenciales y configuración local de Claude Code
 .env
 .claude/settings.local.json
+
+# El APK se publica como GitHub Release, no en el repo (~80 MB por versión)
+*.apk
