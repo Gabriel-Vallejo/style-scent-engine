@@ -65,6 +65,16 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   línea `Metro: exp://...`** antes de asumir que `client.ts` apunta bien.
 - La app funciona arrancando Expo con `npx expo start -c` (interactivo). Con
   `CI=1` el móvil daba "Failed to download remote update".
+- **APK con EAS Build** (proyecto `@imtrucha/style-scent` en expo.dev, perfil
+  `preview` de `frontend/eas.json`). La URL del backend se hornea en el APK vía
+  `EXPO_PUBLIC_API_URL`; `usesCleartextTraffic` es obligatorio porque el backend
+  va por HTTP. El APK compilado está en la raíz (`style-scent.apk`).
+- Login de EAS por SSH: `eas login --sso` no funciona (redirige a `localhost`
+  del navegador, que está en otro equipo). Usar usuario/contraseña o
+  `EXPO_TOKEN` con un token de acceso; nunca pegar el token en el chat.
+- `expo-doctor` avisó de dos cosas que rompían el APK y ya están resueltas:
+  faltaba `expo-font` (peer de `@expo/vector-icons`) y el SDK 57 ya no admite
+  la clave `splash` en app.json (se usa el plugin `expo-splash-screen`).
 - `docker-compose.yml` levanta dos contenedores:
   - `style_scent_db` (MySQL 8.0): `127.0.0.1:3307` → `3306`.
   - `style_scent_vision` (FastAPI): `127.0.0.1:8001`.
