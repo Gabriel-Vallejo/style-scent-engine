@@ -11,6 +11,7 @@ Proyecto personal de portfolio, aplicando Diseño de Bases de Datos e Ingenierí
 - [x] Motor de puntuación (`StyleScentService`) y recomendación del mejor perfume, con tests unitarios
 - [x] App móvil React Native (Expo): registro, gestión y recomendación
 - [x] Microservicio de visión artificial (Fase 2): sugiere categoría, color y estilos a partir de una foto
+- [x] APK nativo para Android ([`style-scent.apk`](style-scent.apk)), compilado con EAS Build
 
 ## Funcionalidades de la app
 
@@ -52,12 +53,14 @@ MySQL y el servicio de visión solo escuchan en `127.0.0.1`: el único punto de 
 ├── vision-service/          # Microservicio de visión en Python (ver su README)
 ├── frontend/                # App móvil en React Native (Expo)
 │   ├── App.tsx              # Navegación por pestañas
+│   ├── app.json / eas.json  # Configuración de la app y del build del APK
 │   └── src/
 │       ├── api/             # Cliente HTTP hacia el backend
 │       ├── components/      # Tarjeta de resultado del match
 │       ├── screens/         # Prenda / Perfume / Recomendar
 │       └── types.ts         # Tipos compartidos con los DTOs del backend
 ├── database/                # Esquema (01-schema.sql) y datos iniciales (02-datos.sql)
+├── style-scent.apk          # App Android lista para instalar
 └── docker-compose.yml       # MySQL + servicio de visión
 ```
 
@@ -155,11 +158,34 @@ npx expo start
 ```
 La URL del backend está en `frontend/src/api/client.ts`: debe apuntar a la IP del servidor en la red local, la misma que muestra Metro (`exp://<ip>:8081`).
 
+## Instalar la app en Android (APK)
+
+[`style-scent.apk`](style-scent.apk) es la app nativa: se instala en el móvil y funciona sin Expo Go ni Metro.
+
+1. Descarga el APK en el móvil (desde GitHub: abre el archivo y pulsa *Download raw file*).
+2. Ábrelo. Android pedirá permitir "instalar apps de origen desconocido" para el navegador o el gestor de archivos: es normal en apps que no vienen de Google Play.
+3. El móvil tiene que estar en la **misma wifi que el servidor**, con el backend encendido.
+
+La URL del backend queda fijada al compilar (`EXPO_PUBLIC_API_URL` en [`frontend/eas.json`](frontend/eas.json), ahora `http://192.168.1.44:8080/api`). Si el router cambia la IP del servidor, hay que cambiarla ahí y recompilar.
+
+### Recompilar el APK
+
+Se compila en la nube con [EAS Build](https://docs.expo.dev/build/introduction/), sin Android Studio:
+
+```bash
+cd frontend
+npx eas-cli@latest login          # o exportar EXPO_TOKEN con un token de acceso
+npx eas-cli@latest build -p android --profile preview
+```
+
+Al terminar, EAS da un enlace para descargar el APK. El perfil `preview` genera un APK firmado con una clave que guarda EAS.
+
 ## Tests
 
 ```bash
 (cd backend && ./mvnw test)                        # 24 tests (necesita MySQL levantado)
 (cd vision-service && .venv/bin/python -m pytest)   # 17 tests (ver su README para crear el entorno)
+(cd frontend && npx tsc --noEmit && npm run lint)   # tipos y lint de la app
 ```
 
 ## Probar la API
@@ -184,5 +210,5 @@ curl -X POST http://localhost:8080/api/prendas/analizar -F "imagen=@chaqueta.jpg
 
 - **Base de datos**: MySQL 8.0 (Docker)
 - **Backend**: Java 21, Spring Boot 4.1, Spring Data JPA, Lombok
-- **App móvil**: TypeScript, React Native, Expo, React Navigation, Expo Vector Icons, Expo Image Picker
+- **App móvil**: TypeScript, React Native, Expo (SDK 57), React Navigation, Expo Vector Icons, Expo Image Picker, EAS Build
 - **IA**: Python 3.12, FastAPI, OpenCV, scikit-learn, PyTorch + Hugging Face Transformers (CLIP)
