@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Si llega otro push a la misma rama, se cancela la ejecución anterior
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (Java + MySQL)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_ci
+          MYSQL_DATABASE: style_scent
+          MYSQL_USER: app_user
+          MYSQL_PASSWORD: app_ci
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot_ci"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v7
+
+      # El contenedor de servicio arranca antes del checkout, así que el
+      # esquema y los datos se cargan con el cliente mysql del runner
+      - name: Cargar esquema y datos iniciales
+        run: |
+          for f in database/01-schema.sql database/02-datos.sql; do
+            mysql --default-character-set=utf8mb4 -h 127.0.0.1 -P 3307 -uroot -proot_ci style_scent < "$f"
+          done
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Tests
+        working-directory: backend
+        env:
+          DB_USERNAME: app_user
+          DB_PASSWORD: app_ci
+        run: ./mvnw -B test
+
+  vision:
+    name: Servicio de visión (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vision-service
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: vision-service/requirements*.txt
+
+      # PyTorch en versión CPU, igual que en el Dockerfile
+      - name: Instalar dependencias
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+
+      # Los tests no cargan CLIP (usan un clasificador falso), no hace falta el modelo
+      - name: Tests
+        run: python -m pytest -q
+
+  frontend:
+    name: App (TypeScript + lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
