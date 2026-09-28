@@ -169,7 +169,7 @@ La app nativa se publica en [Releases](https://github.com/Gabriel-Vallejo/style-
 2. Ábrelo. Android pedirá permitir "instalar apps de origen desconocido" para el navegador o el gestor de archivos: es normal en apps que no vienen de Google Play.
 3. El móvil tiene que estar en la **misma wifi que el servidor**, con el backend encendido.
 
-La URL del backend queda fijada al compilar (`EXPO_PUBLIC_API_URL` en [`frontend/eas.json`](frontend/eas.json), ahora `http://192.168.1.44:8080/api`). Si el router cambia la IP del servidor, hay que cambiarla ahí y recompilar.
+La URL del backend queda fijada al compilar (`EXPO_PUBLIC_API_URL` en [`frontend/eas.json`](frontend/eas.json), ahora `http://192.168.1.35:8080/api`). Si el router cambia la IP del servidor, hay que cambiarla ahí y recompilar.
 
 ### Recompilar el APK
 

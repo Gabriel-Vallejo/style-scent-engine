@@ -67,9 +67,9 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
 ## Infraestructura y entorno
 
 - Todo corre en un servidor Linux (Pop!_OS) al que se accede por Remote-SSH /
-  JetBrains Gateway. A 2026-09-27 el servidor solo tiene una interfaz de red,
-  la wifi, con IP `192.168.1.44`: la misma para SSH, Metro y la app. Antes
-  había usado `192.168.1.41`, que ahora el router ha dado al móvil. Las IPs las
+  JetBrains Gateway. A 2026-09-28 el servidor solo tiene una interfaz de red,
+  la wifi, con IP `192.168.1.35`: la misma para SSH, Metro y la app. Antes
+  había usado `192.168.1.44` y `192.168.1.41` (DHCP dinámico). Las IPs las
   asigna el router y pueden cambiar: **verificar con `ip -4 addr` o con la
   línea `Metro: exp://...`** antes de asumir que `client.ts` apunta bien.
 - La app funciona arrancando Expo con `npx expo start -c` (interactivo). Con

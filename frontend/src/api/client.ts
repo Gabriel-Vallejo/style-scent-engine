@@ -2,7 +2,7 @@ import { File } from "expo-file-system";
 
 // En el APK la URL se fija al compilar (EXPO_PUBLIC_API_URL en eas.json); en
 // desarrollo con Expo Go se usa la IP del servidor en la red local.
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.44:8080/api";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.35:8080/api";
 
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`);
