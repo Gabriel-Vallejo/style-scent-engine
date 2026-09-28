@@ -1,8 +1,17 @@
+import Constants from "expo-constants";
 import { File } from "expo-file-system";
 
-// En el APK la URL se fija al compilar (EXPO_PUBLIC_API_URL en eas.json); en
-// desarrollo con Expo Go se usa la IP del servidor en la red local.
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.35:8080/api";
+// En desarrollo (Expo Go) el backend corre en la misma máquina que Metro, así
+// que se usa el host desde el que se ha cargado la app: sigue funcionando
+// aunque el router cambie la IP. hostUri es "192.168.1.35:8081".
+function urlDesdeMetro(): string | undefined {
+  const host = Constants.expoConfig?.hostUri?.split(":")[0];
+  return __DEV__ && host ? `http://${host}:8080/api` : undefined;
+}
+
+// En el APK no hay Metro: la URL se fija al compilar (EXPO_PUBLIC_API_URL en eas.json).
+const API_BASE_URL =
+  urlDesdeMetro() ?? process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.35:8080/api";
 
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`);
