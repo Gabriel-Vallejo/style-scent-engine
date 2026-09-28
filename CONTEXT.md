@@ -70,8 +70,9 @@ Qué hace cada parte, API y cómo arrancarlo: ver `README.md`.
   JetBrains Gateway. A 2026-09-28 el servidor solo tiene una interfaz de red,
   la wifi, con IP `192.168.1.35`: la misma para SSH, Metro y la app. Antes
   había usado `192.168.1.44` y `192.168.1.41` (DHCP dinámico). Las IPs las
-  asigna el router y pueden cambiar: **verificar con `ip -4 addr` o con la
-  línea `Metro: exp://...`** antes de asumir que `client.ts` apunta bien.
+  asigna el router y pueden cambiar. En Expo Go no importa: `client.ts` saca
+  la IP del host de Metro (`Constants.expoConfig.hostUri`). El APK sí la lleva
+  fija (`eas.json`): **verificar con `ip -4 addr`** antes de compilarlo.
 - La app funciona arrancando Expo con `npx expo start -c` (interactivo). Con
   `CI=1` el móvil daba "Failed to download remote update".
 - Desde que la app está vinculada a EAS (`owner` + `projectId` en app.json),
