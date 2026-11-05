@@ -25,5 +25,24 @@ services:
       # Solo lo usa el backend, que corre en este mismo servidor
       - "127.0.0.1:8001:8001"
 
+  backend:
+    build: ./backend
+    container_name: style_scent_backend
+    restart: always
+    # Si el esquema aún no está cargado, Hibernate (validate) falla y Docker reintenta
+    depends_on:
+      - db
+      - vision
+    environment:
+      DB_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      VISION_URL: http://vision:8001
+      # Sin esto cada consulta va al log de Docker, que no rota y llena el disco
+      SPRING_JPA_SHOW_SQL: "false"
+    ports:
+      # Público: es lo que usa la app móvil. Con HTTPS (Caddy) cámbialo a 127.0.0.1:8080
+      - "8080:8080"
+
 volumes:
   db_data:
